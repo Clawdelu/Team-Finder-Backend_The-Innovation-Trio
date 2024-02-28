@@ -1,14 +1,20 @@
 package com.theinnovationtrio.TeamFinderAPI.entities;
 
-import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.*;
+
 
 import java.util.UUID;
 
-@Data
-@Document
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 public class SkillCategory {
+    @Id
     private UUID id;
     private UUID createdBy;
-    private String skillName;
+    private String skillCategoryName;
 }

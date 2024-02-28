@@ -1,28 +1,34 @@
 package com.theinnovationtrio.TeamFinderAPI.user;
 
-import com.theinnovationtrio.TeamFinderAPI.entities.SkillAssignment;
+import com.theinnovationtrio.TeamFinderAPI.entities.User_Skill;
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
+import com.theinnovationtrio.TeamFinderAPI.organization.Organization;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.UUID;
 
-@Data
-@Document
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 public class User {
     @Id
     private UUID id;
-    private UUID organizationId;
+    @ManyToOne(cascade = CascadeType.ALL, fetch= FetchType.LAZY)
+    private Organization organization;
+
     private UUID departmentId;
     private String userName;
     private String email;
     private String password;
     private List<Role> roles;
-    private List<SkillAssignment> skillAssignment;
+   // private List<User_Skill> skillAssignment;
     private int availableHours;
 
 }

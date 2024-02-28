@@ -1,15 +1,28 @@
 package com.theinnovationtrio.TeamFinderAPI.organization;
 
-import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.theinnovationtrio.TeamFinderAPI.user.User;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
-@Data
-@Document
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 public class Organization {
+    @Id
     private UUID id;
     private UUID createdBy;
     private String organizationName;
     private String headquarterAddress;
+    @OneToMany(mappedBy = "organization")
+    @JsonIgnore
+    private List<User> users;
+
 }
