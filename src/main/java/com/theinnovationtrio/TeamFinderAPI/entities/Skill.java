@@ -1,8 +1,7 @@
 package com.theinnovationtrio.TeamFinderAPI.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import com.theinnovationtrio.TeamFinderAPI.department.Department;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
@@ -14,8 +13,9 @@ public class Skill {
     @Id
     private UUID id;
     private UUID createdBy;
-    @OneToOne
+    @ManyToOne
     private SkillCategory skillCategory;
     private String description;
-    //private List<String> departments;
+    @OneToMany
+    private List<Department> departments;
 }

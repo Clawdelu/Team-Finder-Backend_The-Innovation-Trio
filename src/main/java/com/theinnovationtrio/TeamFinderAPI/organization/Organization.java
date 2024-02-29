@@ -2,6 +2,7 @@ package com.theinnovationtrio.TeamFinderAPI.organization;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.theinnovationtrio.TeamFinderAPI.user.User;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -21,8 +22,7 @@ public class Organization {
     private UUID createdBy;
     private String organizationName;
     private String headquarterAddress;
-    @OneToMany(mappedBy = "organization")
-    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     private List<User> users;
 
 }
