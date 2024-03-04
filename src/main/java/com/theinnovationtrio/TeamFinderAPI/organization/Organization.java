@@ -22,7 +22,7 @@ public class Organization {
     private UUID createdBy;
     private String organizationName;
     private String headquarterAddress;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
+    @OneToMany(cascade = CascadeType.ALL)
     private List<User> users;
 
 }

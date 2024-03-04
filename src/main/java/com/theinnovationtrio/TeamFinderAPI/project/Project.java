@@ -7,12 +7,14 @@ import com.theinnovationtrio.TeamFinderAPI.enums.ProjectStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -30,8 +32,10 @@ public class Project {
     private LocalDate deadlineDate;
     private ProjectStatus projectStatus;
     private String generalDescription;
-   // private List<TechnologyStack> technologyStack;
-    //private List<Project_TeamRole> teamRoles;
+    @OneToMany
+    private List<TechnologyStack> technologyStack;
+    @OneToMany
+    private List<Project_TeamRole> teamRoles;
     private UUID createdBy;
 
 

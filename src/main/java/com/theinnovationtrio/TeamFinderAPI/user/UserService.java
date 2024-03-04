@@ -2,10 +2,7 @@ package com.theinnovationtrio.TeamFinderAPI.user;
 
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,7 +15,7 @@ import java.util.UUID;
 public class UserService implements IUserService{
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    //private final BCryptPasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
     @Override
@@ -40,9 +37,9 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public User getUserById(UUID id) {
+    public User getUserById(UUID userId) {
 
-        return  userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return  userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     @Override
@@ -56,6 +53,9 @@ public class UserService implements IUserService{
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         User updatedUser = userMapper.INSTANCE.userDtotoUser(userDto);
+        updatedUser.setId(user.getId());
+        updatedUser.setRoles(user.getRoles());
+        updatedUser.setAvailableHours(user.getAvailableHours());
         return userRepository.save(updatedUser);
     }
 

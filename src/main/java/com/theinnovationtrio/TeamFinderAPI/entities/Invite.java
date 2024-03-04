@@ -2,8 +2,6 @@ package com.theinnovationtrio.TeamFinderAPI.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,11 +14,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Project_TeamRole {
+public class Invite {
     @Id
     private UUID id;
-    @ManyToOne
-    private TeamRole teamRole;
-    private int noOfMembers;
-    private UUID projectId;
+    private UUID organizationId;
+    private UUID createdBy;
+    private boolean available;
 }

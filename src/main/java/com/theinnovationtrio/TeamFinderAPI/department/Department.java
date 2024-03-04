@@ -23,9 +23,7 @@ public class Department {
     private String departmentName;
     private UUID createdBy;
     private UUID departmentManager;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "department")
+    @OneToMany(cascade = CascadeType.ALL)
     @JsonIgnore
     private List<User> users;
-    @ManyToOne
-    Skill skill;
 }

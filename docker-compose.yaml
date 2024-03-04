@@ -1,15 +1,12 @@
-version: '3.2'
-
+version: "3.9"
 services:
-  db:
-    build: .
-    image: mcmoe/mssqldocker
-    environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: mypass1.
-      MSSQL_DB: TestDb
-      MSSQL_USER: asmws
-      MSSQL_PASSWORD: mypass1.
+  db-csu-backend:
+    image: mysql:latest
+    container_name: my-sql-test
     ports:
-      - "1433:1433"
-    container_name: mssqldev
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test1
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass1

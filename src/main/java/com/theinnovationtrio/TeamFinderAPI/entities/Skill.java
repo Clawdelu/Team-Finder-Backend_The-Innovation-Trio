@@ -16,6 +16,6 @@ public class Skill {
     @ManyToOne
     private SkillCategory skillCategory;
     private String description;
-    @OneToMany
+    @ManyToMany
     private List<Department> departments;
 }

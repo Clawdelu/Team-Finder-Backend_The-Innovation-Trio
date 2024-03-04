@@ -10,18 +10,17 @@ logging:
 
 spring:
   datasource:
-    username: sa
-    password: mypass1.
-    url: jdbc:sqlserver://localhost:1433;database=TestDb
+    username: user
+    password: pass1
+    url: jdbc:mysql://localhost:3306/test1
     type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
-      dialect: org.hibernate.dialect.SQLServerDialect
+      ddl-auto: update
     show-sql: true
-
-  jooq:
-    sql-dialect: org.hibernate.dialect.SQLServerDialect
-
+  security:
+    user:
+      password: pass
+      name: user
 
