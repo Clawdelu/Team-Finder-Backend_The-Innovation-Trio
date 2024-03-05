@@ -1,4 +1,4 @@
-package com.theinnovationtrio.TeamFinderAPI.entities;
+package com.theinnovationtrio.TeamFinderAPI.invite;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -20,4 +20,5 @@ public class Invite {
     private UUID organizationId;
     private UUID createdBy;
     private boolean available;
+
 }

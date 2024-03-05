@@ -1,5 +1,6 @@
 package com.theinnovationtrio.TeamFinderAPI.user;
 
+import com.theinnovationtrio.TeamFinderAPI.auth.AdminSignUpDto;
 import com.theinnovationtrio.TeamFinderAPI.auth.SignUpDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,8 +11,6 @@ public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     User userDtotoUser(UserDto userDto);
-//    @Mapping(target = "password", ignore = true)
-//    User signUpDtotoUser(SignUpDto signUpDto);
 
     @Mapping(target = "password", ignore = true)
     @Mapping(source = "name", target = "userName")
@@ -19,6 +18,14 @@ public interface UserMapper {
 
     default User signUpDtotoUser(SignUpDto signUpDto, String password) {
         User user = signUpDtotoUser(signUpDto);
+        user.setPassword(password);
+        return user;
+    }
+    @Mapping(target = "password", ignore = true)
+    @Mapping(source = "name", target = "userName")
+    User adminSignUpDtotoUser(AdminSignUpDto adminSignUpDto);
+    default User adminSignUpDtotoUser(AdminSignUpDto adminSignUpDto, String password){
+        User user = adminSignUpDtotoUser(adminSignUpDto);
         user.setPassword(password);
         return user;
     }

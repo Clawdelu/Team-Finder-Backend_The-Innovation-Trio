@@ -1,4 +1,4 @@
-package com.theinnovationtrio.TeamFinderAPI.organization;
+package com.theinnovationtrio.TeamFinderAPI.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrganizationDto {
-    private String organizationName;
-    private String headquarterAddress;
+public class UserIdDto {
+    private UUID userId;
 }

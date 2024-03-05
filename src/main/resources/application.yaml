@@ -12,13 +12,14 @@ spring:
   datasource:
     username: user
     password: pass1
-    url: jdbc:mysql://localhost:3306/test1
+    url: ${DB_URL:jdbc:mysql://localhost:3306/test1}
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    defer-datasource-initialization: true
   security:
     user:
       password: pass

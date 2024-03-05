@@ -27,7 +27,6 @@ public class User {
 //    @Column(nullable = false)
 //    private Organization organization;
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
     private Department department;
     @Column(nullable = false)
     private String userName;
