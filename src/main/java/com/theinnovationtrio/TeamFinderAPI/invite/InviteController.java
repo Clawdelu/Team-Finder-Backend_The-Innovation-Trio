@@ -18,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/users")
 public class InviteController {
     private final IInviteService inviteService;
     private final IUserService userService;
@@ -45,7 +46,7 @@ public class InviteController {
         }
     }
 
-    @PostMapping("/users/{userId}/invites")
+    @PostMapping("/{userId}/invites")
     public ResponseEntity<?> createInvite(@PathVariable UUID userId){
         User user = userService.getUserById(userId);
         Invite savedInvite = inviteService

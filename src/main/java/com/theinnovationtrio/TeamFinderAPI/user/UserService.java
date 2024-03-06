@@ -16,10 +16,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements IUserService{
+public class UserService implements IUserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -39,11 +40,12 @@ public class UserService implements IUserService{
         // user.setRoles(Collections.singleton(roles));
         return userRepository.save(user);
     }
+
     @Override
     public User createUser(AdminSignUpDto adminSignUpDto) {
         String encryptedPassword = passwordEncoder.encode(adminSignUpDto.getPassword());
         User user = userMapper.adminSignUpDtotoUser(adminSignUpDto, encryptedPassword);
-        user.setRoles(new ArrayList<>(Arrays.asList(Role.Organization_Admin)));
+        user.setRoles(new ArrayList<>(Arrays.asList(Role.Organization_Admin, Role.Employee)));
         user.setId(UUID.randomUUID());
         user.setAvailableHours(8);
         Organization organization = organizationService
@@ -55,13 +57,33 @@ public class UserService implements IUserService{
     @Override
     public User getUserById(UUID userId) {
 
-        return  userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     @Override
     public List<User> getAllUsers() {
 
         return userRepository.findAll();
+    }
+
+    @Override
+    public List<User> getAllUnemployedUsers() {
+        List<User> unemployedUsers = getAllUsers();
+        return unemployedUsers.stream()
+                .filter(user -> user.getDepartment() == null)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void addRoleToUser(UUID userId, List<Role> roles) {
+        User user = getUserById(userId);
+        boolean hasEmplpoyeeRole = roles.stream()
+                        .anyMatch(role -> role == Role.Employee);
+        if(!hasEmplpoyeeRole){
+            roles.add(Role.Employee);
+        }
+        user.setRoles(roles);
+        userRepository.save(user);
     }
 
     @Override
