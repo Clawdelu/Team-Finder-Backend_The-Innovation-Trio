@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.api.ErrorMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,40 +41,57 @@ public class UserController {
         }
     }
 
-    @GetMapping("/unemployed")
-    public ResponseEntity<List<User>> getAllUnemployedUsers() {
-        List<User> unemployedUsers = userService.getAllUnemployedUsers();
-        if (unemployedUsers.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(unemployedUsers);
+    @GetMapping("/{userId}/sameOrganization")
+    public ResponseEntity<?> getAllUsersFromOrganization(@PathVariable UUID userId) {
+        try {
+            List<User> organizationUsers = userService.getOrganizationUsers(userId);
+            if (organizationUsers.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.ok(organizationUsers);
+            }
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
+        }
+
+    }
+
+    @GetMapping("/{userId}/unassigned")
+    public ResponseEntity<?> getAllUnemployedUsers(@PathVariable UUID userId) {
+        try {
+            List<User> unemployedUsers = userService.getAllUnemployedUsers(userId);
+            if (unemployedUsers.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.ok(unemployedUsers);
+            }
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
         }
     }
 
-    @PatchMapping("/{userId}/roles")
-    public ResponseEntity<?> addRoleToUser(@PathVariable UUID userId, @RequestParam List<Role> roles){
-        try{
-            userService.addRoleToUser(userId, roles);
+    @PatchMapping("/{userId}/roles/{userRoleId}")
+    public ResponseEntity<?> addRoleToUser(@PathVariable UUID userId, @PathVariable UUID userRoleId, @RequestParam List<Role> roles) {
+        try {
+            userService.addRoleToUser(userId, userRoleId, roles);
             return ResponseEntity.ok("Roles have been added successfully!");
-        } catch(EntityNotFoundException ex){
-            return ResponseEntity.notFound().build();
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
         }
-
     }
-
-//    @PostMapping("/users")
-//    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto){
-//        User savedUser = userService.createUser(userDto);
-//        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-//                .path("/{id}")
-//                .buildAndExpand(savedUser.getId())
-//                .toUri();
-//        return ResponseEntity.created(location).build();
-//    }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable UUID userId) {
-        userService.deleteUserById(userId);
+    public ResponseEntity<?> deleteUser(@PathVariable UUID userId) {
+        try {
+            userService.deleteUserById(userId);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        }
     }
 
     // UPDATE ROLE

@@ -1,9 +1,9 @@
 package com.theinnovationtrio.TeamFinderAPI.entities;
 
+import com.theinnovationtrio.TeamFinderAPI.teamRole.TeamRole;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

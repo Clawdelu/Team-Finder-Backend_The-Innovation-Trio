@@ -1,14 +1,11 @@
 package com.theinnovationtrio.TeamFinderAPI.invite;
 
-import com.theinnovationtrio.TeamFinderAPI.organization.Organization;
-import com.theinnovationtrio.TeamFinderAPI.user.IUserService;
-import com.theinnovationtrio.TeamFinderAPI.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.ErrorMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -21,25 +18,24 @@ import java.util.UUID;
 @RequestMapping("/users")
 public class InviteController {
     private final IInviteService inviteService;
-    private final IUserService userService;
 
     @GetMapping("/invites")
-    public ResponseEntity<List<Invite>> getAllInvites(){
+    public ResponseEntity<List<Invite>> getAllInvites() {
         List<Invite> invites = inviteService.getAllInvites();
-        if(invites.isEmpty()){
-            return ResponseEntity.noContent().header("Message", "Nu este nici o invitatie.").build();
+        if (invites.isEmpty()) {
+            return ResponseEntity.noContent().header("Message", "There is no invitation.").build();
         } else {
             return ResponseEntity.ok(invites);
         }
     }
 
     @GetMapping("/invites/{inviteId}")
-    public ResponseEntity<?> getInviteById(@PathVariable UUID inviteId){
-        try{
+    public ResponseEntity<?> getInviteById(@PathVariable UUID inviteId) {
+        try {
             Invite invite = inviteService.getInviteById(inviteId);
             return ResponseEntity.ok(invite);
-        } catch (EntityNotFoundException ex){
-            String errorMessage = "Invitatia cu ID-ul " + inviteId + " nu a fost gasita.";
+        } catch (EntityNotFoundException ex) {
+            String errorMessage = "The invitation with the ID " + inviteId + "was not found.";
             ErrorMessage errorResponse = new ErrorMessage(errorMessage);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(errorResponse);
@@ -47,28 +43,33 @@ public class InviteController {
     }
 
     @PostMapping("/{userId}/invites")
-    public ResponseEntity<?> createInvite(@PathVariable UUID userId){
-        User user = userService.getUserById(userId);
-        Invite savedInvite = inviteService
-                .createInvite(new InviteDto(user.getOrganizationId()), userId);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(savedInvite.getId())
-                .toUri();
-        return ResponseEntity.created(location).build();
+    public ResponseEntity<?> createInvite(@PathVariable UUID userId) {
+        try {
+            Invite savedInvite = inviteService
+                    .createInvite(userId);
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(savedInvite.getId())
+                    .toUri();
+            return ResponseEntity.created(location).build();
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
+        }
     }
 
     @DeleteMapping("/invites/{inviteId}")
-    public void deleteInviteById(@PathVariable UUID inviteId){
+    public void deleteInviteById(@PathVariable UUID inviteId) {
         inviteService.deleteInviteById(inviteId);
     }
 
     @PutMapping("/invites/{inviteId}")
-    public ResponseEntity<Invite> updateInviteStatus(@PathVariable UUID inviteId, @RequestBody boolean status){
-        try{
-            Invite updatedInvite = inviteService.updateInvite(inviteId,status);
+    public ResponseEntity<Invite> updateInviteStatus(@PathVariable UUID inviteId, @RequestBody boolean status) {
+        try {
+            Invite updatedInvite = inviteService.updateInvite(inviteId, status);
             return ResponseEntity.ok(updatedInvite);
-        } catch(EntityNotFoundException ex){
+        } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();
         }
     }

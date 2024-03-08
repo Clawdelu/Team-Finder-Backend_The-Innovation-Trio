@@ -26,7 +26,7 @@ public class User {
 //    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    @Column(nullable = false)
 //    private Organization organization;
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne( fetch = FetchType.EAGER)
     private Department department;
     @Column(nullable = false)
     private String userName;

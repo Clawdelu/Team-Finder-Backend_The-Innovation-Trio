@@ -2,13 +2,14 @@ package com.theinnovationtrio.TeamFinderAPI.user;
 
 import com.theinnovationtrio.TeamFinderAPI.auth.AdminSignUpDto;
 import com.theinnovationtrio.TeamFinderAPI.auth.SignUpDto;
+import com.theinnovationtrio.TeamFinderAPI.department.Department;
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
-import com.theinnovationtrio.TeamFinderAPI.invite.IInviteService;
 import com.theinnovationtrio.TeamFinderAPI.organization.IOrganizationService;
 import com.theinnovationtrio.TeamFinderAPI.organization.Organization;
 import com.theinnovationtrio.TeamFinderAPI.organization.OrganizationDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,13 +27,12 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final IOrganizationService organizationService;
-    private final IInviteService inviteService;
 
     @Override
     public User createUser(SignUpDto signUpDto, UUID organizationId) {
         String encryptedPassword = passwordEncoder.encode(signUpDto.getPassword());
         User user = userMapper.signUpDtotoUser(signUpDto, encryptedPassword);
-        user.setRoles(new ArrayList<>(Arrays.asList(Role.Employee)));
+        user.setRoles(new ArrayList<>(List.of(Role.Employee)));
         user.setId(UUID.randomUUID());
         user.setAvailableHours(8);
         user.setOrganizationId(organizationId);
@@ -67,36 +67,88 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> getAllUnemployedUsers() {
-        List<User> unemployedUsers = getAllUsers();
-        return unemployedUsers.stream()
-                .filter(user -> user.getDepartment() == null)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void addRoleToUser(UUID userId, List<Role> roles) {
-        User user = getUserById(userId);
-        boolean hasEmplpoyeeRole = roles.stream()
-                        .anyMatch(role -> role == Role.Employee);
-        if(!hasEmplpoyeeRole){
-            roles.add(Role.Employee);
+    public List<User> getOrganizationUsers(UUID userId) {
+        List<User> organizationUsers = getAllUsers();
+        User adminUser = getUserById(userId);
+        boolean hasAdminRole = adminUser.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Organization_Admin));
+        if (hasAdminRole) {
+            return organizationUsers.stream()
+                    .filter(user -> user.getOrganizationId().equals(adminUser.getOrganizationId()))
+                    .collect(Collectors.toList());
         }
-        user.setRoles(roles);
-        userRepository.save(user);
+        throw new AccessDeniedException("Unauthorized access!");
+
     }
 
     @Override
-    public User updateUser(UUID userId, UserDto userDto) {
+    public List<User> getAllUnemployedUsers(UUID userId) {
+        User adminUser = getUserById(userId);
+        boolean hasAdminRole = adminUser.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Organization_Admin));
+        if (hasAdminRole) {
+            List<User> unemployedUsers = getAllUsers();
+            return unemployedUsers.stream()
+                    .filter(user -> user.getDepartment() == null
+                            && user.getOrganizationId().equals(adminUser.getOrganizationId()))
+                    .collect(Collectors.toList());
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
+        }
+    }
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    @Override
+    public void addRoleToUser(UUID userId, UUID userRoleId, List<Role> roles) {
+        User user = getUserById(userId);
+        boolean hasAdminRole = user.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Organization_Admin));
+        if (hasAdminRole) {
+            boolean hasEmployeeRole = roles.stream()
+                    .anyMatch(role -> role == Role.Employee);
+            if (!hasEmployeeRole) {
+                roles.add(Role.Employee);
+            }
+            try {
+                User userChangeRole = getUserById(userRoleId);
+                userChangeRole.setRoles(roles);
+                userRepository.save(userChangeRole);
+            } catch (EntityNotFoundException ex) {
+                throw new EntityNotFoundException("The user you want to assign roles to does not exist.");
+            }
+
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
+        }
+
+    }
+
+    @Override
+    public User removeDepartmentFromUser(UUID userToRemoveId) {
+        User userToRemoveDepartment = getUserById(userToRemoveId);
+        userToRemoveDepartment.setDepartment(null);
+        return userRepository.save(userToRemoveDepartment);
+    }
+
+    @Override
+    public User addDepartmentToUser(UUID userToAssignId, Department department) {
+        User userToAssignDepartment = getUserById(userToAssignId);
+        userToAssignDepartment.setDepartment(department);
+        return userRepository.save(userToAssignDepartment);
+    }
+
+
+    //nu e folosita inca
+    @Override
+    public User updateUserRole(UUID userId, UserDto userDto) {
+
+        User user = getUserById(userId);
         user.setRoles(userDto.getRoles());
         return userRepository.save(user);
     }
 
     @Override
     public void deleteUserById(UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        getUserById(userId);
         userRepository.deleteById(userId);
 
     }

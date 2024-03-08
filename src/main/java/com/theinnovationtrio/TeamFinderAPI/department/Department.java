@@ -1,9 +1,10 @@
 package com.theinnovationtrio.TeamFinderAPI.department;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.theinnovationtrio.TeamFinderAPI.entities.Skill;
 import com.theinnovationtrio.TeamFinderAPI.user.User;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +24,7 @@ public class Department {
     private String departmentName;
     private UUID createdBy;
     private UUID departmentManager;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     @JsonIgnore
     private List<User> users;
 }

@@ -1,4 +1,5 @@
 package com.theinnovationtrio.TeamFinderAPI.user;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.theinnovationtrio.TeamFinderAPI.department.Department;
 import com.theinnovationtrio.TeamFinderAPI.entities.User_Skill;
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
@@ -17,4 +18,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserDto {
     private List<Role> roles;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Department department;
 }

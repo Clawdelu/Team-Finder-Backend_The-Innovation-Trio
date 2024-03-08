@@ -1,4 +1,4 @@
-package com.theinnovationtrio.TeamFinderAPI.entities;
+package com.theinnovationtrio.TeamFinderAPI.teamRole;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

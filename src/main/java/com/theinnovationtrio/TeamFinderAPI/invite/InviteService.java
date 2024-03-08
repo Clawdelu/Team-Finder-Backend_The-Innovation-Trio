@@ -1,7 +1,11 @@
 package com.theinnovationtrio.TeamFinderAPI.invite;
 
+import com.theinnovationtrio.TeamFinderAPI.enums.Role;
+import com.theinnovationtrio.TeamFinderAPI.user.IUserService;
+import com.theinnovationtrio.TeamFinderAPI.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,15 +14,24 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class InviteService implements IInviteService{
     private final InviteRepository inviteRepository;
+    private final IUserService userService;
 
     @Override
-    public Invite createInvite(InviteDto inviteDto, UUID userId) {
-        Invite invite = new Invite();
-        invite.setId(UUID.randomUUID());
-        invite.setOrganizationId(inviteDto.getOrganizationId());
-        invite.setCreatedBy(userId);
-        invite.setAvailable(true);
-        return inviteRepository.save(invite);
+    public Invite createInvite(UUID userId) {
+        User adminUser = userService.getUserById(userId);
+        boolean hasAdminRole = adminUser.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Organization_Admin));
+        if(hasAdminRole){
+            Invite invite = new Invite();
+            invite.setId(UUID.randomUUID());
+            invite.setOrganizationId(adminUser.getOrganizationId());
+            invite.setCreatedBy(userId);
+            invite.setAvailable(true);
+            return inviteRepository.save(invite);
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
+        }
+
     }
 
     @Override
