@@ -8,6 +8,12 @@ logging:
         sql: DEBUG
         type.descriptor.sql.BasicBinder: ERROR
 
+application:
+  security:
+    jwt:
+      secret-key: 219499c2fa6d45a4b3f37b138d29f733ba20e5e891bc1a7c277dbecaa53ccf54
+      expiration: 86400000
+
 spring:
   datasource:
     username: user

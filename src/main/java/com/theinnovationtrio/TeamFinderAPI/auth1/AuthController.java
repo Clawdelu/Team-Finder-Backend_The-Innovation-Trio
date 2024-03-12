@@ -1,12 +1,7 @@
-package com.theinnovationtrio.TeamFinderAPI.auth;
+package com.theinnovationtrio.TeamFinderAPI.auth1;
 
-import com.theinnovationtrio.TeamFinderAPI.enums.Role;
 import com.theinnovationtrio.TeamFinderAPI.invite.IInviteService;
 import com.theinnovationtrio.TeamFinderAPI.invite.Invite;
-import com.theinnovationtrio.TeamFinderAPI.invite.InviteService;
-import com.theinnovationtrio.TeamFinderAPI.organization.Organization;
-import com.theinnovationtrio.TeamFinderAPI.organization.OrganizationDto;
-import com.theinnovationtrio.TeamFinderAPI.organization.OrganizationService;
 import com.theinnovationtrio.TeamFinderAPI.user.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +20,7 @@ import java.util.*;
 
 @RestController
 public class AuthController {
-    @Autowired
+  /*  @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
     private UserRepository userRepository;
@@ -91,5 +85,5 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
 
-    }
+    }*/
 }

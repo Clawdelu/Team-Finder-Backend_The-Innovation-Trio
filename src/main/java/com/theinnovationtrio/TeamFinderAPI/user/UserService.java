@@ -1,7 +1,9 @@
 package com.theinnovationtrio.TeamFinderAPI.user;
 
-import com.theinnovationtrio.TeamFinderAPI.auth.AdminSignUpDto;
-import com.theinnovationtrio.TeamFinderAPI.auth.SignUpDto;
+import com.theinnovationtrio.TeamFinderAPI.auth.AdminRegisterRequest;
+import com.theinnovationtrio.TeamFinderAPI.auth.UserRegisterRequest;
+import com.theinnovationtrio.TeamFinderAPI.auth1.AdminSignUpDto;
+import com.theinnovationtrio.TeamFinderAPI.auth1.SignUpDto;
 import com.theinnovationtrio.TeamFinderAPI.department.Department;
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
 import com.theinnovationtrio.TeamFinderAPI.organization.IOrganizationService;
@@ -55,9 +57,44 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public User createUser(UserRegisterRequest userRegisterRequest, UUID organizationId) {
+        String encryptedPassword = passwordEncoder.encode(userRegisterRequest.getPassword());
+        User user = userMapper.mapToUser(userRegisterRequest, encryptedPassword);
+        user.setRoles(new ArrayList<>(List.of(Role.Employee)));
+        user.setId(UUID.randomUUID());
+        user.setAvailableHours(8);
+        user.setOrganizationId(organizationId);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User createUser(AdminRegisterRequest adminRegisterRequest) {
+        String encryptedPassword = passwordEncoder.encode(adminRegisterRequest.getPassword());
+        User user = userMapper.mapToUser(adminRegisterRequest, encryptedPassword);
+        user.setRoles(new ArrayList<>(Arrays.asList(Role.Organization_Admin, Role.Employee)));
+        user.setId(UUID.randomUUID());
+        user.setAvailableHours(8);
+        Organization organization = organizationService
+                .createOrganization(new OrganizationDto(adminRegisterRequest.getOrganizationName(), adminRegisterRequest.getHeadquarterAddress()), user);
+        user.setOrganizationId(organization.getId());
+        return userRepository.save(user);
+    }
+
+
+
+    @Override
     public User getUserById(UUID userId) {
 
         return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     @Override

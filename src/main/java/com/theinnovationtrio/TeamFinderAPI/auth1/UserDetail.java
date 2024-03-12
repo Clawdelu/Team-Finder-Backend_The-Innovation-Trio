@@ -1,4 +1,4 @@
-package com.theinnovationtrio.TeamFinderAPI.auth;
+package com.theinnovationtrio.TeamFinderAPI.auth1;
 
 import com.theinnovationtrio.TeamFinderAPI.user.User;
 import com.theinnovationtrio.TeamFinderAPI.user.UserRepository;
