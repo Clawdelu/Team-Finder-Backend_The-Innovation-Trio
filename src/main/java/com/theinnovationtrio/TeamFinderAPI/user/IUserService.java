@@ -7,6 +7,7 @@ import com.theinnovationtrio.TeamFinderAPI.auth1.SignUpDto;
 import com.theinnovationtrio.TeamFinderAPI.department.Department;
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,12 +20,12 @@ public interface IUserService {
     User getUserByEmail(String email);
     boolean existsByEmail(String email);
     List<User> getAllUsers();
-    List<User> getOrganizationUsers(UUID userId);
-    List<User> getAllUnemployedUsers(UUID userId);
-    void addRoleToUser(UUID userId, UUID userRoleId, List<Role> roles);
+    List<User> getOrganizationUsers(Principal connectedUser);
+    List<User> getAllUnemployedUsers(Principal connectedUser);
+    void addRoleToUser(Principal connectedUser, UUID userId, List<Role> roles);
     User removeDepartmentFromUser(UUID userToRemoveId);
     User addDepartmentToUser(UUID userToAssignId, Department department);
     User updateUserRole(UUID userId, UserDto userDto);
-    void deleteUserById(UUID userId);
+    void deleteUserById(UUID userId,Principal connectedUser);
 
 }

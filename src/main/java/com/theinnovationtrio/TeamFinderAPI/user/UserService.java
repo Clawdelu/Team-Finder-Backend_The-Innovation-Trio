@@ -12,9 +12,11 @@ import com.theinnovationtrio.TeamFinderAPI.organization.OrganizationDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -104,9 +106,9 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> getOrganizationUsers(UUID userId) {
+    public List<User> getOrganizationUsers(Principal connectedUser) {
         List<User> organizationUsers = getAllUsers();
-        User adminUser = getUserById(userId);
+        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {
@@ -115,12 +117,13 @@ public class UserService implements IUserService {
                     .collect(Collectors.toList());
         }
         throw new AccessDeniedException("Unauthorized access!");
-
     }
 
     @Override
-    public List<User> getAllUnemployedUsers(UUID userId) {
-        User adminUser = getUserById(userId);
+    public List<User> getAllUnemployedUsers(Principal connectedUser) {
+        //var user1 = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        //System.out.println("NAME: " + user1.getUserName());
+        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {
@@ -135,8 +138,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void addRoleToUser(UUID userId, UUID userRoleId, List<Role> roles) {
-        User user = getUserById(userId);
+    public void addRoleToUser(Principal connectedUser, UUID userId, List<Role> roles) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = user.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {
@@ -146,7 +149,7 @@ public class UserService implements IUserService {
                 roles.add(Role.Employee);
             }
             try {
-                User userChangeRole = getUserById(userRoleId);
+                User userChangeRole = getUserById(userId);
                 userChangeRole.setRoles(roles);
                 userRepository.save(userChangeRole);
             } catch (EntityNotFoundException ex) {
@@ -184,9 +187,17 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void deleteUserById(UUID userId) {
-        getUserById(userId);
-        userRepository.deleteById(userId);
-
+    public void deleteUserById(UUID userId,Principal connectedUser) {
+        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        boolean hasAdminRole = adminUser.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Organization_Admin));
+        User userToDelete =  getUserById(userId);
+        boolean hasSameOrganization = userToDelete.getOrganizationId()
+                .equals(adminUser.getOrganizationId());
+        if(hasAdminRole && hasSameOrganization){
+            userRepository.deleteById(userId);
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
+        }
     }
 }

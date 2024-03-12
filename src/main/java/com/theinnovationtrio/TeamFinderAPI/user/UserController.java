@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,10 +42,10 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{userId}/sameOrganization")
-    public ResponseEntity<?> getAllUsersFromOrganization(@PathVariable UUID userId) {
+    @GetMapping("/same-organization")
+    public ResponseEntity<?> getAllUsersFromOrganization(Principal connectedUser) {
         try {
-            List<User> organizationUsers = userService.getOrganizationUsers(userId);
+            List<User> organizationUsers = userService.getOrganizationUsers(connectedUser);
             if (organizationUsers.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -56,10 +57,10 @@ public class UserController {
 
     }
 
-    @GetMapping("/{userId}/unassigned")
-    public ResponseEntity<?> getAllUnemployedUsers(@PathVariable UUID userId) {
+    @GetMapping("/unassigned")
+    public ResponseEntity<?> getAllUnemployedUsers(Principal connectedUser) {
         try {
-            List<User> unemployedUsers = userService.getAllUnemployedUsers(userId);
+            List<User> unemployedUsers = userService.getAllUnemployedUsers(connectedUser);
             if (unemployedUsers.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -72,10 +73,10 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/{userId}/roles/{userRoleId}")
-    public ResponseEntity<?> addRoleToUser(@PathVariable UUID userId, @PathVariable UUID userRoleId, @RequestParam List<Role> roles) {
+    @PatchMapping("{userId}/assign-roles/")
+    public ResponseEntity<?> addRoleToUser(@PathVariable UUID userId, @RequestBody List<Role> roles, Principal connectedUser) {
         try {
-            userService.addRoleToUser(userId, userRoleId, roles);
+            userService.addRoleToUser(connectedUser, userId, roles);
             return ResponseEntity.ok("Roles have been added successfully!");
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
@@ -85,12 +86,16 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable UUID userId) {
+    public ResponseEntity<?> deleteUser(@PathVariable UUID userId, Principal connectedUser) {
         try {
-            userService.deleteUserById(userId);
+            userService.deleteUserById(userId,connectedUser);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body("Message: " + ex.getMessage());
         }
     }
 
