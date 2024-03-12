@@ -20,8 +20,8 @@ public class UserController {
     private final IUserService userService;
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<UserDto> users = userService.getAllUsers();
         if (users.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
@@ -45,7 +45,7 @@ public class UserController {
     @GetMapping("/same-organization")
     public ResponseEntity<?> getAllUsersFromOrganization(Principal connectedUser) {
         try {
-            List<User> organizationUsers = userService.getOrganizationUsers(connectedUser);
+            List<UserDto> organizationUsers = userService.getOrganizationUsers(connectedUser);
             if (organizationUsers.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -60,7 +60,7 @@ public class UserController {
     @GetMapping("/unassigned")
     public ResponseEntity<?> getAllUnemployedUsers(Principal connectedUser) {
         try {
-            List<User> unemployedUsers = userService.getAllUnemployedUsers(connectedUser);
+            List<UserDto> unemployedUsers = userService.getAllUnemployedUsers(connectedUser);
             if (unemployedUsers.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -98,15 +98,4 @@ public class UserController {
             return ResponseEntity.badRequest().body("Message: " + ex.getMessage());
         }
     }
-
-    // UPDATE ROLE
-//    @PutMapping("/{userId}")
-//    public ResponseEntity<User> updateUser(@PathVariable UUID userId, @RequestBody UserDto userDto) {
-//        try {
-//            User updatedUser = userService.updateUser(userId, userDto);
-//            return ResponseEntity.ok(updatedUser);
-//        } catch (EntityNotFoundException ex) {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
 }

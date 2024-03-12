@@ -7,19 +7,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/invites")
 public class InviteController {
     private final IInviteService inviteService;
 
-    @GetMapping("/invites")
+    @GetMapping()
     public ResponseEntity<List<Invite>> getAllInvites() {
         List<Invite> invites = inviteService.getAllInvites();
         if (invites.isEmpty()) {
@@ -29,7 +28,7 @@ public class InviteController {
         }
     }
 
-    @GetMapping("/invites/{inviteId}")
+    @GetMapping("{inviteId}")
     public ResponseEntity<?> getInviteById(@PathVariable UUID inviteId) {
         try {
             Invite invite = inviteService.getInviteById(inviteId);
@@ -42,16 +41,13 @@ public class InviteController {
         }
     }
 
-    @PostMapping("/{userId}/invites")
-    public ResponseEntity<?> createInvite(@PathVariable UUID userId) {
+    @PostMapping()
+    public ResponseEntity<?> createInvite(Principal connectedUser) {
         try {
             Invite savedInvite = inviteService
-                    .createInvite(userId);
-            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(savedInvite.getId())
-                    .toUri();
-            return ResponseEntity.created(location).build();
+                    .createInvite(connectedUser);
+
+            return ResponseEntity.ok(InviteDto.builder().id(savedInvite.getId()).build());
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
         } catch (AccessDeniedException ex) {
@@ -59,12 +55,12 @@ public class InviteController {
         }
     }
 
-    @DeleteMapping("/invites/{inviteId}")
+    @DeleteMapping("{inviteId}")
     public void deleteInviteById(@PathVariable UUID inviteId) {
         inviteService.deleteInviteById(inviteId);
     }
 
-    @PutMapping("/invites/{inviteId}")
+    @PutMapping("{inviteId}")
     public ResponseEntity<Invite> updateInviteStatus(@PathVariable UUID inviteId, @RequestBody boolean status) {
         try {
             Invite updatedInvite = inviteService.updateInvite(inviteId, status);

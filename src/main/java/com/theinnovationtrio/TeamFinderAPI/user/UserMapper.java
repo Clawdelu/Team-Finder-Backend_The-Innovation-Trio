@@ -8,11 +8,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    User userDtotoUser(UserDto userDto);
+    UserDto mapToUserDto(User user);
+    List<UserDto> mapToUserDto(List<User> users);
 
     @Mapping(target = "password", ignore = true)
     @Mapping(source = "name", target = "userName")

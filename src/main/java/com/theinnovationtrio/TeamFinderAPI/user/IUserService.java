@@ -19,13 +19,12 @@ public interface IUserService {
     User getUserById(UUID userId);
     User getUserByEmail(String email);
     boolean existsByEmail(String email);
-    List<User> getAllUsers();
-    List<User> getOrganizationUsers(Principal connectedUser);
-    List<User> getAllUnemployedUsers(Principal connectedUser);
+    List<UserDto> getAllUsers();
+    List<UserDto> getOrganizationUsers(Principal connectedUser);
+    List<UserDto> getAllUnemployedUsers(Principal connectedUser);
     void addRoleToUser(Principal connectedUser, UUID userId, List<Role> roles);
     User removeDepartmentFromUser(UUID userToRemoveId);
     User addDepartmentToUser(UUID userToAssignId, Department department);
-    User updateUserRole(UUID userId, UserDto userDto);
     void deleteUserById(UUID userId,Principal connectedUser);
 
 }

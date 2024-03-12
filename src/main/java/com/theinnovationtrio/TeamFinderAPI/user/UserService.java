@@ -32,6 +32,7 @@ public class UserService implements IUserService {
     private final UserMapper userMapper;
     private final IOrganizationService organizationService;
 
+
     @Override
     public User createUser(SignUpDto signUpDto, UUID organizationId) {
         String encryptedPassword = passwordEncoder.encode(signUpDto.getPassword());
@@ -86,7 +87,6 @@ public class UserService implements IUserService {
 
     @Override
     public User getUserById(UUID userId) {
-
         return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
     @Override
@@ -100,14 +100,13 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-
-        return userRepository.findAll();
+    public List<UserDto> getAllUsers() {
+        return userMapper.INSTANCE.mapToUserDto(userRepository.findAll());
     }
 
     @Override
-    public List<User> getOrganizationUsers(Principal connectedUser) {
-        List<User> organizationUsers = getAllUsers();
+    public List<UserDto> getOrganizationUsers(Principal connectedUser) {
+        List<UserDto> organizationUsers = getAllUsers();
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
@@ -115,19 +114,19 @@ public class UserService implements IUserService {
             return organizationUsers.stream()
                     .filter(user -> user.getOrganizationId().equals(adminUser.getOrganizationId()))
                     .collect(Collectors.toList());
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
         }
-        throw new AccessDeniedException("Unauthorized access!");
+
     }
 
     @Override
-    public List<User> getAllUnemployedUsers(Principal connectedUser) {
-        //var user1 = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
-        //System.out.println("NAME: " + user1.getUserName());
+    public List<UserDto> getAllUnemployedUsers(Principal connectedUser) {
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {
-            List<User> unemployedUsers = getAllUsers();
+            List<UserDto> unemployedUsers = getAllUsers();
             return unemployedUsers.stream()
                     .filter(user -> user.getDepartment() == null
                             && user.getOrganizationId().equals(adminUser.getOrganizationId()))
@@ -176,15 +175,6 @@ public class UserService implements IUserService {
         return userRepository.save(userToAssignDepartment);
     }
 
-
-    //nu e folosita inca
-    @Override
-    public User updateUserRole(UUID userId, UserDto userDto) {
-
-        User user = getUserById(userId);
-        user.setRoles(userDto.getRoles());
-        return userRepository.save(user);
-    }
 
     @Override
     public void deleteUserById(UUID userId,Principal connectedUser) {

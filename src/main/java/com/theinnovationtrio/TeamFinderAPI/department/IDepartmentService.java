@@ -1,13 +1,15 @@
 package com.theinnovationtrio.TeamFinderAPI.department;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
 public interface IDepartmentService {
-    Department createDepartment(UUID userId, DepartmentDto departmentDto);
+    Department createDepartment(Principal connectedUser, DepartmentDto departmentDto);
     List<Department> getAllDepartments();
+    List<Department> getAllSameOrgDepartments(Principal connectedUser);
     Department getDepartmentById(UUID departmentId);
-    Department updateDepartment(UUID userId, UUID departmentId, DepartmentDto departmentDto);
-    void addDepartmentToUser(UUID userId,List<UUID> userToAssignIds);
-    void deleteDepartmentById(UUID userId, UUID departmentId);
+    Department updateDepartment(Principal connectedUser, UUID departmentId, DepartmentDto departmentDto);
+    void addDepartmentToUser(Principal connectedUser,List<UUID> userToAssignIds);
+    void deleteDepartmentById(Principal connectedUser, UUID departmentId);
 }
