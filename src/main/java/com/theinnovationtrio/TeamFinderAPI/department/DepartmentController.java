@@ -92,11 +92,23 @@ public class DepartmentController {
         }
     }
 
-    @PatchMapping("/members")
-    public ResponseEntity<?> addDepartmentToUsers(@RequestParam List<UUID> userToAssignIds, Principal connectedUser) {
+    @PatchMapping("/add-members")
+    public ResponseEntity<?> addMemberstoDepartment(@RequestBody List<UUID> userToAssignIds, Principal connectedUser) {
         try {
-            departmentService.addDepartmentToUser(connectedUser, userToAssignIds);
+            departmentService.addUsersToDepartment(connectedUser, userToAssignIds);
             return ResponseEntity.ok("User/s have been added successfully to department!");
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
+        }
+    }
+
+    @PatchMapping("/remove-members")
+    public ResponseEntity<?> removeMembersFromDepartment(@RequestBody List<UUID> userToAssignIds, Principal connectedUser) {
+        try {
+            departmentService.removeUsersFromDepartment(connectedUser, userToAssignIds);
+            return ResponseEntity.ok("User/s have been removed successfully from department!");
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
         } catch (AccessDeniedException ex) {

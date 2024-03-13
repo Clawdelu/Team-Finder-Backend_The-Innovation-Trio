@@ -10,6 +10,7 @@ public interface IDepartmentService {
     List<Department> getAllSameOrgDepartments(Principal connectedUser);
     Department getDepartmentById(UUID departmentId);
     Department updateDepartment(Principal connectedUser, UUID departmentId, DepartmentDto departmentDto);
-    void addDepartmentToUser(Principal connectedUser,List<UUID> userToAssignIds);
+    void addUsersToDepartment(Principal connectedUser, List<UUID> userToAssignIds);
+    void removeUsersFromDepartment(Principal connectedUser, List<UUID> userToRemoveIds);
     void deleteDepartmentById(Principal connectedUser, UUID departmentId);
 }

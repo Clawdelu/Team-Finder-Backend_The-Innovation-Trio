@@ -33,9 +33,11 @@ public class DepartmentService implements IDepartmentService {
             department.setDepartmentName(departmentDto.getDepartmentName());
             if (departmentDto.getDepartmentManager() != null) {
                 assignDepartmentManager(departmentDto, adminUser, department);
+                departmentRepository.save(department);
+                userService.addDepartmentToUser(departmentDto.getDepartmentManager(), department);
+            } else {
+                departmentRepository.save(department);
             }
-            departmentRepository.save(department);
-            userService.addDepartmentToUser(departmentDto.getDepartmentManager(), department);
             return department;
         } else {
             throw new AccessDeniedException("Unauthorized access!");
@@ -112,7 +114,7 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public void addDepartmentToUser(Principal connectedUser, List<UUID> userToAssignIds) {
+    public void addUsersToDepartment(Principal connectedUser, List<UUID> userToAssignIds) {
         User departManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasDepartmentManagerRole = departManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
@@ -120,8 +122,33 @@ public class DepartmentService implements IDepartmentService {
             Department department = getDepartmentById(departManagerUser.getDepartment().getId());
             List<User> departmentUsers = department.getUsers();
             userToAssignIds.forEach(userToAssignId -> {
-                User user = userService.addDepartmentToUser(userToAssignId, department);
-                departmentUsers.add(user);
+                boolean hasSameOrganization = userService.getUserById(userToAssignId).getOrganizationId()
+                        .equals(departManagerUser.getOrganizationId());
+                if(hasSameOrganization){
+                    User user = userService.addDepartmentToUser(userToAssignId, department);
+                    departmentUsers.add(user);
+                } else {
+                    throw new AccessDeniedException("Unauthorized access!");
+                }
+            });
+            department.setUsers(departmentUsers);
+            departmentRepository.save(department);
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
+        }
+    }
+
+    @Override
+    public void removeUsersFromDepartment(Principal connectedUser, List<UUID> userToRemoveIds) {
+        User departManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        boolean hasDepartmentManagerRole = departManagerUser.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Department_Manager));
+        if(hasDepartmentManagerRole){
+            Department department = getDepartmentById(departManagerUser.getDepartment().getId());
+            List<User> departmentUsers = department.getUsers();
+            userToRemoveIds.forEach(userToRemoveId ->{
+                User user = userService.removeDepartmentFromUser(userToRemoveId);
+                departmentUsers.remove(user);
             });
             department.setUsers(departmentUsers);
             departmentRepository.save(department);
