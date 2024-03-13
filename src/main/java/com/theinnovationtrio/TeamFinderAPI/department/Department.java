@@ -1,12 +1,14 @@
-package com.theinnovationtrio.TeamFinderAPI.organization;
+package com.theinnovationtrio.TeamFinderAPI.department;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.theinnovationtrio.TeamFinderAPI.user.User;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,13 +18,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Organization {
+public class Department {
     @Id
     private UUID id;
+    private String departmentName;
     private UUID createdBy;
-    private String organizationName;
-    private String headquarterAddress;
-    @OneToMany(cascade = CascadeType.ALL)
+    private UUID departmentManager;
+    @OneToMany
+    @JsonIgnore
     private List<User> users;
-
 }
