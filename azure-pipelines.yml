@@ -1,0 +1,18 @@
+pool: 'default'
+
+jobs:
+- job: Deploy
+  displayName: Maven Package and Publish Artifacts
+  steps:
+  - task: Maven@3
+    displayName: 'Maven Package'
+    inputs:
+      mavenPomFile: 'pom.xml'
+
+  - task: AzureWebApp@1
+    displayName: 'Deploy Azure Web App'
+    inputs:
+      azureSubscription: 'the-innovation-trio-service-connection'
+      appType: 'webAppLinux'
+      appName: "atc-2024-the-innovation-trio-be-linux-web-app"
+      package: '$(Pipeline.Workspace)/**/target/*.?(war|jar)'
