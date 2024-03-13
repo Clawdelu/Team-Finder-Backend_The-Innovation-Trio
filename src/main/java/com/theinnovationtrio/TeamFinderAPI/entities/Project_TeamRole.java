@@ -1,9 +1,6 @@
 package com.theinnovationtrio.TeamFinderAPI.entities;
 
-import com.theinnovationtrio.TeamFinderAPI.enums.Experience;
-import com.theinnovationtrio.TeamFinderAPI.enums.Level;
-import com.theinnovationtrio.TeamFinderAPI.user.User;
-import jakarta.persistence.CascadeType;
+import com.theinnovationtrio.TeamFinderAPI.teamRole.TeamRole;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -19,12 +16,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class User_Skill {
+public class Project_TeamRole {
     @Id
     private UUID id;
-    @ManyToOne(cascade = CascadeType.ALL)
-    private Skill skill;
-    private Level level;
-    private Experience experience;
-
+    @ManyToOne
+    private TeamRole teamRole;
+    private int noOfMembers;
+    private UUID projectId;
 }
