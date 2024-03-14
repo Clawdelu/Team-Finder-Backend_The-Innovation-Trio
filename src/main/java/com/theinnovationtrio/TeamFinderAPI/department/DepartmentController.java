@@ -20,7 +20,6 @@ import java.util.UUID;
 public class DepartmentController {
     private final IDepartmentService departmentService;
 
-    @ApiOperation(value = "Create a department", notes = "AAAAAaaaasdasd")
     @PostMapping()
     public ResponseEntity<?> createDepartment(@RequestBody DepartmentDto departmentDto, Principal connectedUser) {
         try {
