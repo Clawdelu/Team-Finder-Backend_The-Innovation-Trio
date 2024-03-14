@@ -17,10 +17,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/team-roles")
 public class TeamRoleController {
+
     private final ITeamRoleService teamRoleService;
 
     @GetMapping()
     public ResponseEntity<List<TeamRole>> getAllTeamRoles() {
+
         List<TeamRole> teamRoles = teamRoleService.getAllTeamRoles();
         if (teamRoles.isEmpty()) {
             return ResponseEntity.noContent().header("Message", "There is no team role.").build();
@@ -55,6 +57,7 @@ public class TeamRoleController {
 
     @PostMapping()
     public ResponseEntity<?> createTeamRole(@RequestBody TeamRoleDto teamRoleDto, Principal connectedUser) {
+
         try {
             TeamRole teamRole = teamRoleService.createTeamRole(connectedUser, teamRoleDto);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()

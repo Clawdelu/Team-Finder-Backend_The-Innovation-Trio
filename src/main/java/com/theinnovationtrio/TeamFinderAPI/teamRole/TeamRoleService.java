@@ -17,12 +17,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TeamRoleService implements ITeamRoleService {
+
     private final TeamRoleRepository teamRoleRepository;
     private final IUserService userService;
 
-
     @Override
     public TeamRole createTeamRole(Principal connectedUser, TeamRoleDto teamRoleDto) {
+
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
@@ -37,11 +38,13 @@ public class TeamRoleService implements ITeamRoleService {
 
     @Override
     public List<TeamRole> getAllTeamRoles() {
+
         return teamRoleRepository.findAll();
     }
 
     @Override
     public List<TeamRole> getAllSameOrgTeamRoles(Principal connectedUser) {
+
         List<TeamRole> teamRoles = getAllTeamRoles();
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
@@ -58,11 +61,14 @@ public class TeamRoleService implements ITeamRoleService {
 
     @Override
     public TeamRole getTeamRoleById(UUID teamRoleId) {
-        return teamRoleRepository.findById(teamRoleId).orElseThrow(() -> new EntityNotFoundException("Team Role not found!"));
+
+        return teamRoleRepository.findById(teamRoleId)
+                .orElseThrow(() -> new EntityNotFoundException("Team Role not found!"));
     }
 
     @Override
     public TeamRole updateTeamRole(Principal connectedUser, UUID teamRoleId, TeamRoleDto teamRoleDto) {
+
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
@@ -81,6 +87,7 @@ public class TeamRoleService implements ITeamRoleService {
 
     @Override
     public void deleteTeamRole(Principal connectedUser, UUID teamRoleId) {
+
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));

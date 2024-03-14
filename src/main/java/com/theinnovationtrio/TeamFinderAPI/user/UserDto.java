@@ -19,12 +19,20 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
+
     private UUID id;
+
     private Department department;
+
     private String userName;
+
     private String email;
+
     private List<Role> roles;
+
     private List<User_Skill> skills;
+
     private int availableHours;
+
     private UUID organizationId;
 }

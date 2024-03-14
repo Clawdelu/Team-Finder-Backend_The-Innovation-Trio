@@ -16,18 +16,16 @@ application:
 
 spring:
   datasource:
-    username: innovationtrio_lqtyug
-    password: ATC2024!SecurePassword
-    url: jdbc:sqlserver://atc-2024-mssql-server.database.windows.net:1433;database=atc-2024-the-innovation-trio-sql-database
+    username: user
+    password: pass1
+    url: ${DB_URL:jdbc:mysql://localhost:3306/test1}
     type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      dialect: org.hibernate.dialect.SQLServerDialect
       ddl-auto: update
     show-sql: true
     defer-datasource-initialization: true
-    database-platform: org.hibernate.dialect.SQLServer2012Dialect
   security:
     user:
       password: pass
