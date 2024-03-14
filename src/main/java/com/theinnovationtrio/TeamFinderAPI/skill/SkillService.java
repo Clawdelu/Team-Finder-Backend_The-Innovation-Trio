@@ -7,14 +7,12 @@ import com.theinnovationtrio.TeamFinderAPI.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,9 +22,9 @@ public class SkillService implements ISkillService {
     private final IUserService userService;
 
     @Override
-    public Skill createSkill(Principal connectedUser, SkillDto skillDto) {
+    public Skill createSkill(SkillDto skillDto) {
 
-        User departmentManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
 
@@ -63,18 +61,15 @@ public class SkillService implements ISkillService {
     }
 
     @Override
-    public List<Skill> getAllSameOrgSkills(Principal connectedUser) {
+    public List<Skill> getAllSameOrgSkills() {
 
-        List<Skill> skills = getAllSkills();
-        User departmentManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        var departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
+        List<Skill> skills = skillRepository.findAllSameOrgById(departmentManagerUser.getId());
 
         if (hasDepartmentManagerRole) {
-            return skills.stream()
-                    .filter(skill -> userService.getUserById(skill.getCreatedBy()).getOrganizationId()
-                            .equals(departmentManagerUser.getOrganizationId()))
-                    .collect(Collectors.toList());
+            return skills;
 
         } else {
             throw new AccessDeniedException("Unauthorized access!");
@@ -82,8 +77,8 @@ public class SkillService implements ISkillService {
     }
 
     @Override
-    public void assignSkillToDepartment(Principal connectedUser, UUID skillId) {
-        User departmentManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    public void assignSkillToDepartment(UUID skillId) {
+        User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
         if (hasDepartmentManagerRole) {
@@ -101,8 +96,8 @@ public class SkillService implements ISkillService {
     }
 
     @Override
-    public void removeSkillFromDepartment(Principal connectedUser, UUID skillId) {
-        User departmentManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    public void removeSkillFromDepartment(UUID skillId) {
+        User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
         if (hasDepartmentManagerRole) {
@@ -120,9 +115,9 @@ public class SkillService implements ISkillService {
     }
 
     @Override
-    public Skill updateSkill(Principal connectedUser, UUID skillId, SkillDto skillDto) {
+    public Skill updateSkill(UUID skillId, SkillDto skillDto) {
 
-        User departmentManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Skill skillToUpdate = getSkillById(skillId);
 
         boolean createdTheSkill = departmentManagerUser.getId()
@@ -147,9 +142,9 @@ public class SkillService implements ISkillService {
     }
 
     @Override
-    public void deleteSkillById(Principal connectedUser, UUID skillId) {
+    public void deleteSkillById(UUID skillId) {
 
-        User departmentManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Skill skillToDelete = getSkillById(skillId);
         boolean createdTheSkill = departmentManagerUser.getId()
                 .equals(skillToDelete.getCreatedBy());
