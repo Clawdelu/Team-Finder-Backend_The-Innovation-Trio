@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,10 +43,10 @@ public class SkillController {
     }
 
     @GetMapping("/same-organization")
-    public ResponseEntity<?> getAllSkillsFromSameOrganization(Principal connectedUser) {
+    public ResponseEntity<?> getAllSkillsFromSameOrganization() {
 
         try {
-            List<Skill> skills = skillService.getAllSameOrgSkills(connectedUser);
+            List<Skill> skills = skillService.getAllSameOrgSkills();
             if (skills.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -59,9 +58,9 @@ public class SkillController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createSkill(@RequestBody SkillDto skillDto, Principal connectedUser) {
+    public ResponseEntity<?> createSkill(@RequestBody SkillDto skillDto) {
         try {
-            Skill skill = skillService.createSkill(connectedUser, skillDto);
+            Skill skill = skillService.createSkill(skillDto);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id}")
                     .buildAndExpand(skill.getId())
@@ -76,11 +75,10 @@ public class SkillController {
     }
 
     @PutMapping("{skillId}")
-    public ResponseEntity<?> updateSkill(@PathVariable UUID skillId, @RequestBody SkillDto skillDto,
-                                         Principal connectedUser) {
+    public ResponseEntity<?> updateSkill(@PathVariable UUID skillId, @RequestBody SkillDto skillDto) {
 
         try {
-            Skill skill = skillService.updateSkill(connectedUser, skillId, skillDto);
+            Skill skill = skillService.updateSkill(skillId, skillDto);
             return ResponseEntity.ok(skill);
 
         } catch (EntityNotFoundException ex) {
@@ -92,10 +90,10 @@ public class SkillController {
     }
 
     @PatchMapping("{skillId}/add-skill-to-department")
-    public ResponseEntity<?> addSkillToDepartment(@PathVariable UUID skillId, Principal connectedUser) {
+    public ResponseEntity<?> addSkillToDepartment(@PathVariable UUID skillId) {
 
         try {
-            skillService.assignSkillToDepartment(connectedUser, skillId);
+            skillService.assignSkillToDepartment(skillId);
             return ResponseEntity.ok("Skill have been added successfully to department!");
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
@@ -105,10 +103,10 @@ public class SkillController {
     }
 
     @PatchMapping("{skillId}/remove-skill-from-department")
-    public ResponseEntity<?> removeSkillFromDepartment(@PathVariable UUID skillId, Principal connectedUser) {
+    public ResponseEntity<?> removeSkillFromDepartment(@PathVariable UUID skillId) {
 
         try {
-            skillService.removeSkillFromDepartment(connectedUser, skillId);
+            skillService.removeSkillFromDepartment(skillId);
             return ResponseEntity.ok("Skill have been removed successfully from department!");
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
@@ -118,10 +116,10 @@ public class SkillController {
     }
 
     @DeleteMapping("{skillId}")
-    public ResponseEntity<?> deleteSkill(@PathVariable UUID skillId, Principal connectedUser) {
+    public ResponseEntity<?> deleteSkill(@PathVariable UUID skillId) {
 
         try {
-            skillService.deleteSkillById(connectedUser, skillId);
+            skillService.deleteSkillById(skillId);
             return ResponseEntity.ok().build();
 
         } catch (EntityNotFoundException ex) {

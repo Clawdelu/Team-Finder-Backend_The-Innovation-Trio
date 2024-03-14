@@ -113,17 +113,22 @@ public class DepartmentService implements IDepartmentService {
             department.setDepartmentName(departmentDto.getDepartmentName());
 
             if (departmentDto.getDepartmentManager() != null) {
-                assignDepartmentManager(departmentDto, adminUser, department);
+                if(userService.getUserById(departmentDto.getDepartmentManager()).getDepartment() == null)
+                {
+                    assignDepartmentManager(departmentDto, adminUser, department);
 
-                departmentRepository.save(department);
+                    departmentRepository.save(department);
 
-                userService.addDepartmentToUser(departmentDto.getDepartmentManager(), department);
+                    userService.addDepartmentToUser(departmentDto.getDepartmentManager(), department);
+                } else {
+                    throw new RuntimeException("The manager has already a department");
+                }
 
             } else {
                 userService.removeDepartmentFromUser(department.getDepartmentManager());
                 department.setDepartmentManager(null);
-                departmentRepository.save(department);
             }
+            departmentRepository.save(department);
             return department;
 
         } else {
