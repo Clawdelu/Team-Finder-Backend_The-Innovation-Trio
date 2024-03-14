@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class DepartmentService implements IDepartmentService {
+
     private final DepartmentRepository departmentRepository;
     private final IUserService userService;
 
@@ -26,6 +27,7 @@ public class DepartmentService implements IDepartmentService {
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
+
         if (hasAdminRole) {
             Department department = new Department();
             department.setId(UUID.randomUUID());
@@ -45,7 +47,9 @@ public class DepartmentService implements IDepartmentService {
     }
 
     private void assignDepartmentManager(DepartmentDto departmentDto, User user, Department department) {
+
         try {
+
             User userManager = userService.getUserById(departmentDto.getDepartmentManager());
             boolean hasDepartmentManagerRoleAndSameOrganization = userManager.getRoles().stream()
                     .anyMatch(role -> role.equals(Role.Department_Manager))
@@ -62,11 +66,13 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public List<Department> getAllDepartments() {
+
         return departmentRepository.findAll();
     }
 
     @Override
     public List<Department> getAllSameOrgDepartments(Principal connectedUser) {
+
         List<Department> departments = getAllDepartments();
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
@@ -76,6 +82,7 @@ public class DepartmentService implements IDepartmentService {
                     .filter(department -> userService.getUserById(department.getCreatedBy()).getOrganizationId()
                             .equals(adminUser.getOrganizationId()))
                     .collect(Collectors.toList());
+
         } else {
             throw new AccessDeniedException("Unauthorized access!");
         }
@@ -83,23 +90,33 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public Department getDepartmentById(UUID departmentId) {
-        return departmentRepository.findById(departmentId).orElseThrow(() -> new EntityNotFoundException("Department not found"));
+
+        return departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Department not found"));
     }
 
     @Override
     public Department updateDepartment(Principal connectedUser, UUID departmentId, DepartmentDto departmentDto) {
+
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
+
         Department department = getDepartmentById(departmentId);
+
         boolean hasSameOrganization = userService.getUserById(department.getCreatedBy()).getOrganizationId()
                 .equals(adminUser.getOrganizationId());
+
         if (hasAdminRole && hasSameOrganization) {
             department.setCreatedBy(adminUser.getId());
+
             department.setDepartmentName(departmentDto.getDepartmentName());
+
             if (departmentDto.getDepartmentManager() != null) {
                 assignDepartmentManager(departmentDto, adminUser, department);
+
                 departmentRepository.save(department);
+
                 userService.addDepartmentToUser(departmentDto.getDepartmentManager(), department);
 
             } else {
@@ -108,6 +125,7 @@ public class DepartmentService implements IDepartmentService {
                 departmentRepository.save(department);
             }
             return department;
+
         } else {
             throw new AccessDeniedException("Unauthorized access!");
         }
@@ -115,6 +133,7 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public void addUsersToDepartment(Principal connectedUser, List<UUID> userToAssignIds) {
+
         User departManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasDepartmentManagerRole = departManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
@@ -124,7 +143,7 @@ public class DepartmentService implements IDepartmentService {
             userToAssignIds.forEach(userToAssignId -> {
                 boolean hasSameOrganization = userService.getUserById(userToAssignId).getOrganizationId()
                         .equals(departManagerUser.getOrganizationId());
-                if(hasSameOrganization){
+                if (hasSameOrganization) {
                     User user = userService.addDepartmentToUser(userToAssignId, department);
                     departmentUsers.add(user);
                 } else {
@@ -140,13 +159,14 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public void removeUsersFromDepartment(Principal connectedUser, List<UUID> userToRemoveIds) {
+
         User departManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasDepartmentManagerRole = departManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
-        if(hasDepartmentManagerRole){
+        if (hasDepartmentManagerRole) {
             Department department = getDepartmentById(departManagerUser.getDepartment().getId());
             List<User> departmentUsers = department.getUsers();
-            userToRemoveIds.forEach(userToRemoveId ->{
+            userToRemoveIds.forEach(userToRemoveId -> {
                 User user = userService.removeDepartmentFromUser(userToRemoveId);
                 departmentUsers.remove(user);
             });
@@ -159,6 +179,7 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public void deleteDepartmentById(Principal connectedUser, UUID departmentId) {
+
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));

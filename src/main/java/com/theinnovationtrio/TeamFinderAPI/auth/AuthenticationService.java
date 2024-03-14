@@ -2,6 +2,7 @@ package com.theinnovationtrio.TeamFinderAPI.auth;
 
 import com.theinnovationtrio.TeamFinderAPI.config.JwtService;
 import com.theinnovationtrio.TeamFinderAPI.invite.IInviteService;
+import com.theinnovationtrio.TeamFinderAPI.invite.Invite;
 import com.theinnovationtrio.TeamFinderAPI.user.User;
 import com.theinnovationtrio.TeamFinderAPI.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,9 @@ public class AuthenticationService {
                 .build();
     }
 
-    public AuthenticationResponse registerUser(UserRegisterRequest request, UUID inviteId) {
-        User user = userService.createUser(request, inviteId);
-        inviteService.updateInvite(inviteId, false);
+    public AuthenticationResponse registerUser(UserRegisterRequest request, Invite invite) {
+        User user = userService.createUser(request, invite.getOrganizationId());
+        inviteService.updateInvite(invite.getId(), false);
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)

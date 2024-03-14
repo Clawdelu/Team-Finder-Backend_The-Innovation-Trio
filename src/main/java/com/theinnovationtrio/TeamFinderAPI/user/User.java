@@ -21,27 +21,34 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "_user")
 public class User implements UserDetails {
+
     @Id
     private UUID id;
-    //    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    @Column(nullable = false)
-//    private Organization organization;
+
     @ManyToOne(fetch = FetchType.EAGER)
     private Department department;
+
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Column(nullable = false)
     private String userName;
+
     @Column(nullable = false, unique = true)
     private String email;
+
     @Column(nullable = false)
     @JsonIgnore
     private String password;
+
     private List<Role> roles;
+
     @OneToMany
     private List<User_Skill> skills;
+
     private int availableHours;
+
     private UUID organizationId;
 
     @Override

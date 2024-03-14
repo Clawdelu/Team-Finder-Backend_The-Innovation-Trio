@@ -43,7 +43,7 @@ public class AuthenticationController {
         if(!invite.isAvailable()){
             return new ResponseEntity<>("The invitation is not valid!", HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.ok(service.registerUser(request,inviteId));
+        return ResponseEntity.ok(service.registerUser(request,invite));
     }
 
     @PostMapping("/authenticate")

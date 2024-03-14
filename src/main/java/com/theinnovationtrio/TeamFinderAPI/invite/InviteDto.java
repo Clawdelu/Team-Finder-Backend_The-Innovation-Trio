@@ -10,5 +10,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InviteDto {
+
     private UUID id;
 }

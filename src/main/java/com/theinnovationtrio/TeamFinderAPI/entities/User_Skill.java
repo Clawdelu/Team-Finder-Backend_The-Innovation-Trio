@@ -2,7 +2,7 @@ package com.theinnovationtrio.TeamFinderAPI.entities;
 
 import com.theinnovationtrio.TeamFinderAPI.enums.Experience;
 import com.theinnovationtrio.TeamFinderAPI.enums.Level;
-import com.theinnovationtrio.TeamFinderAPI.user.User;
+import com.theinnovationtrio.TeamFinderAPI.skill.Skill;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

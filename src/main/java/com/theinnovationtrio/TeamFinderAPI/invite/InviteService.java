@@ -15,11 +15,13 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class InviteService implements IInviteService {
+
     private final InviteRepository inviteRepository;
 
 
     @Override
     public Invite createInvite(Principal connectedUser) {
+
         User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
@@ -38,21 +40,26 @@ public class InviteService implements IInviteService {
 
     @Override
     public boolean existsById(UUID inviteId) {
+
         return inviteRepository.existsById(inviteId);
     }
 
     @Override
     public Invite getInviteById(UUID inviteId) {
-        return inviteRepository.findById(inviteId).orElseThrow(() -> new EntityNotFoundException("Invite not found"));
+
+        return inviteRepository.findById(inviteId)
+                .orElseThrow(() -> new EntityNotFoundException("Invite not found"));
     }
 
     @Override
     public List<Invite> getAllInvites() {
+
         return inviteRepository.findAll();
     }
 
     @Override
     public Invite updateInvite(UUID inviteId, boolean available) {
+
         Invite invite = getInviteById(inviteId);
         invite.setAvailable(available);
         return inviteRepository.save(invite);
@@ -60,6 +67,7 @@ public class InviteService implements IInviteService {
 
     @Override
     public void deleteInviteById(UUID inviteId) {
+
         getInviteById(inviteId);
         inviteRepository.deleteById(inviteId);
     }
