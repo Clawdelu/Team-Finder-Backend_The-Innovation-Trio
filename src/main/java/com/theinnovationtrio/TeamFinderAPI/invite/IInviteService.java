@@ -1,5 +1,7 @@
 package com.theinnovationtrio.TeamFinderAPI.invite;
 
+import com.theinnovationtrio.TeamFinderAPI.organization.Organization;
+
 import java.util.List;
 import java.util.UUID;
 

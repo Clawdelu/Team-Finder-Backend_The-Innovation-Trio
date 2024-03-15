@@ -1,20 +1,22 @@
 package com.theinnovationtrio.TeamFinderAPI.organization;
 
+import com.theinnovationtrio.TeamFinderAPI.invite.IInviteService;
 import com.theinnovationtrio.TeamFinderAPI.user.User;
-import com.theinnovationtrio.TeamFinderAPI.user.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
-public class OrganizationService implements IOrganizationService{
+public class OrganizationService implements IOrganizationService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationMapper organizationMapper;
+    private final IInviteService inviteService;
+
     @Override
     public Organization createOrganization(OrganizationDto organizationDto, User user) {
         Organization organization = organizationMapper.INSTANCE.mappToOrganization(organizationDto);
@@ -28,6 +30,12 @@ public class OrganizationService implements IOrganizationService{
     public List<Organization> getAllOrganizations() {
 
         return organizationRepository.findAll();
+    }
+
+    @Override
+    public Organization getOrganizationByInvite(UUID inviteId) {
+
+        return getOrganizationById(inviteService.getInviteById(inviteId).getOrganizationId());
     }
 
     @Override

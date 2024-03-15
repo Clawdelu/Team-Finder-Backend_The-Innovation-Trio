@@ -23,6 +23,7 @@ public interface IUserService {
     List<UserDto> getAllUsers();
 
     List<UserDto> getOrganizationUsers();
+    UserDto getConnectedUser();
 
     List<UserDto> getAllUnemployedUsers();
 

@@ -89,6 +89,13 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public UserDto getConnectedUser() {
+        User contextUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user =getUserById(contextUser.getId());
+        return userMapper.INSTANCE.mapToUserDto(user);
+    }
+
+    @Override
     public List<UserDto> getAllUnemployedUsers() {
         User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()

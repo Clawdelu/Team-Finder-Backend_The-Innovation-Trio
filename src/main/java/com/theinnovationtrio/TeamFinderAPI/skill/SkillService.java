@@ -90,6 +90,42 @@ public class SkillService implements ISkillService {
     }
 
     @Override
+    public List<Skill> getAllSameSkillCategorySkills(UUID skillCategoryId) {
+
+        var departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Department_Manager));
+
+        if(hasDepartmentManagerRole){
+            return skillRepository.findAllBySameCategory(skillCategoryId);
+
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
+        }
+    }
+
+    @Override
+    public List<Skill> getAllSkillsCreatedBy() {
+
+        var departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Department_Manager));
+
+        if(hasDepartmentManagerRole){
+            return skillRepository.findAllBySameAuthor(departmentManagerUser.getId());
+
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
+        }
+    }
+
+    @Override
+    public void saveAllSkills(List<Skill> skills) {
+        skillRepository.saveAll(skills);
+    }
+
+
+    @Override
     public void assignSkillToDepartment(UUID skillId) {
         User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()

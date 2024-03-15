@@ -13,7 +13,19 @@ public interface SkillRepository extends JpaRepository<Skill, UUID> {
     List<Skill> findAllSameOrgById(UUID userId);
 
     @Query("select s from Skill s " +
-            "join User u on s.createdBy = u.id " +
-            "where u.department.id = :departmentId")
+            "join fetch s.departments d " +
+            "where d.id = :departmentId")
     List<Skill> findAllBySameDepartment(UUID departmentId);
+
+
+    @Query("select s from Skill s " +
+            "where s.skillCategory.id = :skillCategoryId")
+    List<Skill> findAllBySameCategory(UUID skillCategoryId);
+
+    @Query("select s from Skill s " +
+            "where s.createdBy = :authorId")
+    List<Skill> findAllBySameAuthor(UUID authorId);
+
+
+
 }
