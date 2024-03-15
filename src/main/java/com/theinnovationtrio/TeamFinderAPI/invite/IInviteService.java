@@ -1,12 +1,11 @@
 package com.theinnovationtrio.TeamFinderAPI.invite;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
 public interface IInviteService {
 
-    Invite createInvite(Principal connectedUser);
+    Invite createInvite();
 
     boolean existsById(UUID inviteId);
 

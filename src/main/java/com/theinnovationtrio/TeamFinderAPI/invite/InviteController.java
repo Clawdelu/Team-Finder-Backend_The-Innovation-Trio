@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,10 +41,10 @@ public class InviteController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createInvite(Principal connectedUser) {
+    public ResponseEntity<?> createInvite() {
         try {
             Invite savedInvite = inviteService
-                    .createInvite(connectedUser);
+                    .createInvite();
 
             return ResponseEntity.ok(InviteDto.builder().id(savedInvite.getId()).build());
         } catch (EntityNotFoundException ex) {

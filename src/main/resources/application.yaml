@@ -28,8 +28,5 @@ spring:
     show-sql: true
     defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.SQLServer2012Dialect
-  security:
-    user:
-      password: pass
-      name: user
+
 

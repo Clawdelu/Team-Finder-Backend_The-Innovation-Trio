@@ -6,13 +6,11 @@ import com.theinnovationtrio.TeamFinderAPI.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +20,9 @@ public class DepartmentService implements IDepartmentService {
     private final IUserService userService;
 
     @Override
-    public Department createDepartment(Principal connectedUser, DepartmentDto departmentDto) {
+    public Department createDepartment(DepartmentDto departmentDto) {
 
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
 
@@ -71,17 +69,13 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public List<Department> getAllSameOrgDepartments(Principal connectedUser) {
+    public List<Department> getAllSameOrgDepartments() {
 
-        List<Department> departments = getAllDepartments();
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {
-            return departments.stream()
-                    .filter(department -> userService.getUserById(department.getCreatedBy()).getOrganizationId()
-                            .equals(adminUser.getOrganizationId()))
-                    .collect(Collectors.toList());
+            return departmentRepository.findAllSameOrgById(adminUser.getId());
 
         } else {
             throw new AccessDeniedException("Unauthorized access!");
@@ -96,9 +90,9 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public Department updateDepartment(Principal connectedUser, UUID departmentId, DepartmentDto departmentDto) {
+    public Department updateDepartment(UUID departmentId, DepartmentDto departmentDto) {
 
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
 
@@ -113,8 +107,7 @@ public class DepartmentService implements IDepartmentService {
             department.setDepartmentName(departmentDto.getDepartmentName());
 
             if (departmentDto.getDepartmentManager() != null) {
-                if(userService.getUserById(departmentDto.getDepartmentManager()).getDepartment() == null)
-                {
+                if (userService.getUserById(departmentDto.getDepartmentManager()).getDepartment() == null) {
                     assignDepartmentManager(departmentDto, adminUser, department);
 
                     departmentRepository.save(department);
@@ -137,9 +130,9 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public void addUsersToDepartment(Principal connectedUser, List<UUID> userToAssignIds) {
+    public void addUsersToDepartment(List<UUID> userToAssignIds) {
 
-        User departManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User departManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasDepartmentManagerRole = departManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
         if (hasDepartmentManagerRole) {
@@ -163,9 +156,9 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public void removeUsersFromDepartment(Principal connectedUser, List<UUID> userToRemoveIds) {
+    public void removeUsersFromDepartment(List<UUID> userToRemoveIds) {
 
-        User departManagerUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User departManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasDepartmentManagerRole = departManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
         if (hasDepartmentManagerRole) {
@@ -183,9 +176,9 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public void deleteDepartmentById(Principal connectedUser, UUID departmentId) {
+    public void deleteDepartmentById(UUID departmentId) {
 
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         Department department = getDepartmentById(departmentId);

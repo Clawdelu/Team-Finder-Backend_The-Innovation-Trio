@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ITeamRoleService {
-    TeamRole createTeamRole(Principal connectedUser, TeamRoleDto teamRoleDto);
+    TeamRole createTeamRole(TeamRoleDto teamRoleDto);
     List<TeamRole> getAllTeamRoles();
-    List<TeamRole> getAllSameOrgTeamRoles(Principal connectedUser);
+    List<TeamRole> getAllSameOrgTeamRoles();
     TeamRole getTeamRoleById(UUID teamRoleId);
-    TeamRole updateTeamRole(Principal connectedUser, UUID teamRoleId, TeamRoleDto teamRoleDto);
-    void deleteTeamRole(Principal connectedUser,UUID teamRoleId);
+    TeamRole updateTeamRole(UUID teamRoleId, TeamRoleDto teamRoleDto);
+    void deleteTeamRole(UUID teamRoleId);
 
 }

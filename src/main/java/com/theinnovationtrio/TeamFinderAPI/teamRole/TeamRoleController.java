@@ -32,9 +32,9 @@ public class TeamRoleController {
     }
 
     @GetMapping("/same-organization")
-    public ResponseEntity<?> getAllTeamRolesFromSameOrganization(Principal connectedUser){
+    public ResponseEntity<?> getAllTeamRolesFromSameOrganization(){
         try{
-            List<TeamRole> teamRoles = teamRoleService.getAllSameOrgTeamRoles(connectedUser);
+            List<TeamRole> teamRoles = teamRoleService.getAllSameOrgTeamRoles();
             if (teamRoles.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -56,10 +56,10 @@ public class TeamRoleController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createTeamRole(@RequestBody TeamRoleDto teamRoleDto, Principal connectedUser) {
+    public ResponseEntity<?> createTeamRole(@RequestBody TeamRoleDto teamRoleDto) {
 
         try {
-            TeamRole teamRole = teamRoleService.createTeamRole(connectedUser, teamRoleDto);
+            TeamRole teamRole = teamRoleService.createTeamRole(teamRoleDto);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id}")
                     .buildAndExpand(teamRole.getId())
@@ -73,10 +73,9 @@ public class TeamRoleController {
     }
 
     @PutMapping("{teamRoleId}")
-    public ResponseEntity<?> updateTeamRole(@PathVariable UUID teamRoleId, @RequestBody TeamRoleDto teamRoleDto,
-                                            Principal connectedUser) {
+    public ResponseEntity<?> updateTeamRole(@PathVariable UUID teamRoleId, @RequestBody TeamRoleDto teamRoleDto) {
         try {
-            TeamRole updatedTeamRole = teamRoleService.updateTeamRole(connectedUser, teamRoleId, teamRoleDto);
+            TeamRole updatedTeamRole = teamRoleService.updateTeamRole(teamRoleId, teamRoleDto);
             return ResponseEntity.ok(updatedTeamRole);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
@@ -86,9 +85,9 @@ public class TeamRoleController {
     }
 
     @DeleteMapping("{teamRoleId}")
-    public ResponseEntity<?> deleteTeamRoleById(@PathVariable UUID teamRoleId, Principal connectedUser) {
+    public ResponseEntity<?> deleteTeamRoleById(@PathVariable UUID teamRoleId) {
         try {
-            teamRoleService.deleteTeamRole(connectedUser, teamRoleId);
+            teamRoleService.deleteTeamRole(teamRoleId);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());

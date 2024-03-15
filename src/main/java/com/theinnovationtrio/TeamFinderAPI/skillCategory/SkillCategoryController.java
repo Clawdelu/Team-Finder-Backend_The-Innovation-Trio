@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,14 +45,14 @@ public class SkillCategoryController {
     }
 
     @GetMapping("/same-organization")
-    public ResponseEntity<?> getAllSkillCategoriesFromSameOrganization(Principal connectedUser){
+    public ResponseEntity<?> getAllSkillCategoriesFromSameOrganization() {
 
-        try{
-            List<SkillCategory> skillCategories = skillCategoryService.getAllSameOrgSkillCategories(connectedUser);
-            if(skillCategories.isEmpty()){
+        try {
+            List<SkillCategory> skillCategories = skillCategoryService.getAllSameOrgSkillCategories();
+            if (skillCategories.isEmpty()) {
                 return ResponseEntity.noContent().build();
 
-            } else{
+            } else {
                 return ResponseEntity.ok(skillCategories);
             }
         } catch (AccessDeniedException ex) {
@@ -62,10 +61,10 @@ public class SkillCategoryController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createSkillCategory(@RequestBody SkillCategoryDto skillCategoryDto, Principal connectedUser) {
+    public ResponseEntity<?> createSkillCategory(@RequestBody SkillCategoryDto skillCategoryDto) {
 
         try {
-            SkillCategory skillCategory = skillCategoryService.createSkillCategory(connectedUser, skillCategoryDto);
+            SkillCategory skillCategory = skillCategoryService.createSkillCategory(skillCategoryDto);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id}")
                     .buildAndExpand(skillCategory.getId())
@@ -81,11 +80,10 @@ public class SkillCategoryController {
     }
 
     @PutMapping("{skillCategoryId}")
-    public ResponseEntity<?> updateSkillCategory(@PathVariable UUID skillCategoryId, @RequestBody SkillCategoryDto skillCategoryDto,
-                                                 Principal connectedUser) {
+    public ResponseEntity<?> updateSkillCategory(@PathVariable UUID skillCategoryId, @RequestBody SkillCategoryDto skillCategoryDto) {
 
         try {
-            SkillCategory updatedSkillCategory = skillCategoryService.updateSkillCategory(connectedUser, skillCategoryId, skillCategoryDto);
+            SkillCategory updatedSkillCategory = skillCategoryService.updateSkillCategory(skillCategoryId, skillCategoryDto);
             return ResponseEntity.ok(updatedSkillCategory);
 
         } catch (EntityNotFoundException ex) {
@@ -97,10 +95,10 @@ public class SkillCategoryController {
     }
 
     @DeleteMapping("{skillCategoryId}")
-    public ResponseEntity<?> deleteSkillCategoryById(@PathVariable UUID skillCategoryId, Principal connectedUser) {
+    public ResponseEntity<?> deleteSkillCategoryById(@PathVariable UUID skillCategoryId) {
 
         try {
-            skillCategoryService.deleteSkillCategoryById(connectedUser, skillCategoryId);
+            skillCategoryService.deleteSkillCategoryById(skillCategoryId);
             return ResponseEntity.ok().build();
 
         } catch (EntityNotFoundException ex) {
