@@ -76,6 +76,20 @@ public class SkillService implements ISkillService {
     }
 
     @Override
+    public List<Skill> getAllSameDepartmentSkills() {
+
+        var departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Department_Manager));
+
+        if(hasDepartmentManagerRole){
+            return skillRepository.findAllBySameDepartment(departmentManagerUser.getDepartment().getId());
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
+        }
+    }
+
+    @Override
     public void assignSkillToDepartment(UUID skillId) {
         User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
