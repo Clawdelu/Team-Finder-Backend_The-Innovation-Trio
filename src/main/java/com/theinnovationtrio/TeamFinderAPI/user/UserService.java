@@ -2,8 +2,6 @@ package com.theinnovationtrio.TeamFinderAPI.user;
 
 import com.theinnovationtrio.TeamFinderAPI.auth.AdminRegisterRequest;
 import com.theinnovationtrio.TeamFinderAPI.auth.UserRegisterRequest;
-import com.theinnovationtrio.TeamFinderAPI.auth1.AdminSignUpDto;
-import com.theinnovationtrio.TeamFinderAPI.auth1.SignUpDto;
 import com.theinnovationtrio.TeamFinderAPI.department.Department;
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
 import com.theinnovationtrio.TeamFinderAPI.organization.IOrganizationService;
@@ -12,11 +10,10 @@ import com.theinnovationtrio.TeamFinderAPI.organization.OrganizationDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,33 +28,6 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final IOrganizationService organizationService;
-
-
-    @Override
-    public User createUser(SignUpDto signUpDto, UUID organizationId) {
-        String encryptedPassword = passwordEncoder.encode(signUpDto.getPassword());
-        User user = userMapper.signUpDtotoUser(signUpDto, encryptedPassword);
-        user.setRoles(new ArrayList<>(List.of(Role.Employee)));
-        user.setId(UUID.randomUUID());
-        user.setAvailableHours(8);
-        user.setOrganizationId(organizationId);
-        // Role roles = roleRepository.findByName("ROLE_ADMIN").get();
-        // user.setRoles(Collections.singleton(roles));
-        return userRepository.save(user);
-    }
-
-    @Override
-    public User createUser(AdminSignUpDto adminSignUpDto) {
-        String encryptedPassword = passwordEncoder.encode(adminSignUpDto.getPassword());
-        User user = userMapper.adminSignUpDtotoUser(adminSignUpDto, encryptedPassword);
-        user.setRoles(new ArrayList<>(Arrays.asList(Role.Organization_Admin, Role.Employee)));
-        user.setId(UUID.randomUUID());
-        user.setAvailableHours(8);
-        Organization organization = organizationService
-                .createOrganization(new OrganizationDto(adminSignUpDto.getOrganizationName(), adminSignUpDto.getHeadquarterAddress()), user);
-        user.setOrganizationId(organization.getId());
-        return userRepository.save(user);
-    }
 
     @Override
     public User createUser(UserRegisterRequest userRegisterRequest, UUID organizationId) {
@@ -84,11 +54,11 @@ public class UserService implements IUserService {
     }
 
 
-
     @Override
     public User getUserById(UUID userId) {
         return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
+
     @Override
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -105,15 +75,13 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<UserDto> getOrganizationUsers(Principal connectedUser) {
-        List<UserDto> organizationUsers = getAllUsers();
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    public List<UserDto> getOrganizationUsers() {
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {
-            return organizationUsers.stream()
-                    .filter(user -> user.getOrganizationId().equals(adminUser.getOrganizationId()))
-                    .collect(Collectors.toList());
+            List<User> users = userRepository.findAllByOrganizationId(adminUser.getOrganizationId());
+            return userMapper.INSTANCE.mapToUserDto(users);
         } else {
             throw new AccessDeniedException("Unauthorized access!");
         }
@@ -121,8 +89,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<UserDto> getAllUnemployedUsers(Principal connectedUser) {
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    public List<UserDto> getAllUnemployedUsers() {
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {
@@ -137,8 +105,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void addRoleToUser(Principal connectedUser, UUID userId, List<Role> roles) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    public void addRoleToUser(UUID userId, List<Role> roles) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = user.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {
@@ -177,14 +145,14 @@ public class UserService implements IUserService {
 
 
     @Override
-    public void deleteUserById(UUID userId,Principal connectedUser) {
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    public void deleteUserById(UUID userId) {
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
-        User userToDelete =  getUserById(userId);
+        User userToDelete = getUserById(userId);
         boolean hasSameOrganization = userToDelete.getOrganizationId()
                 .equals(adminUser.getOrganizationId());
-        if(hasAdminRole && hasSameOrganization){
+        if (hasAdminRole && hasSameOrganization) {
             userRepository.deleteById(userId);
         } else {
             throw new AccessDeniedException("Unauthorized access!");

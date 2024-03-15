@@ -66,10 +66,9 @@ public class SkillService implements ISkillService {
         var departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
-        List<Skill> skills = skillRepository.findAllSameOrgById(departmentManagerUser.getId());
 
         if (hasDepartmentManagerRole) {
-            return skills;
+            return skillRepository.findAllSameOrgById(departmentManagerUser.getId());
 
         } else {
             throw new AccessDeniedException("Unauthorized access!");

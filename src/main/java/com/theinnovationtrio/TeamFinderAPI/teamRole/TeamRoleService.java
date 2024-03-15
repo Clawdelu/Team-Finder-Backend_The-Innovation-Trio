@@ -6,13 +6,11 @@ import com.theinnovationtrio.TeamFinderAPI.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +20,9 @@ public class TeamRoleService implements ITeamRoleService {
     private final IUserService userService;
 
     @Override
-    public TeamRole createTeamRole(Principal connectedUser, TeamRoleDto teamRoleDto) {
+    public TeamRole createTeamRole(TeamRoleDto teamRoleDto) {
 
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {
@@ -43,17 +41,14 @@ public class TeamRoleService implements ITeamRoleService {
     }
 
     @Override
-    public List<TeamRole> getAllSameOrgTeamRoles(Principal connectedUser) {
+    public List<TeamRole> getAllSameOrgTeamRoles() {
 
-        List<TeamRole> teamRoles = getAllTeamRoles();
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
-        if(hasAdminRole){
-            return teamRoles.stream()
-                    .filter(teamRole -> userService.getUserById(teamRole.getCreatedBy()).getOrganizationId()
-                            .equals(adminUser.getOrganizationId()))
-                    .collect(Collectors.toList());
+        if (hasAdminRole) {
+            return teamRoleRepository.findAllSameOrgBy(adminUser.getId());
         } else {
             throw new AccessDeniedException("Unauthorized access!");
         }
@@ -67,18 +62,18 @@ public class TeamRoleService implements ITeamRoleService {
     }
 
     @Override
-    public TeamRole updateTeamRole(Principal connectedUser, UUID teamRoleId, TeamRoleDto teamRoleDto) {
+    public TeamRole updateTeamRole(UUID teamRoleId, TeamRoleDto teamRoleDto) {
 
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         TeamRole teamRole = getTeamRoleById(teamRoleId);
         boolean hasSameOrganization = userService.getUserById(teamRole.getCreatedBy()).getOrganizationId()
                 .equals(adminUser.getOrganizationId());
-        if(hasAdminRole && hasSameOrganization){
-                teamRole.setCreatedBy(adminUser.getId());
-                teamRole.setRoleInProject(teamRoleDto.getRoleInProject());
-                return teamRoleRepository.save(teamRole);
+        if (hasAdminRole && hasSameOrganization) {
+            teamRole.setCreatedBy(adminUser.getId());
+            teamRole.setRoleInProject(teamRoleDto.getRoleInProject());
+            return teamRoleRepository.save(teamRole);
         } else {
             throw new AccessDeniedException("Unauthorized access!");
         }
@@ -86,16 +81,16 @@ public class TeamRoleService implements ITeamRoleService {
 
 
     @Override
-    public void deleteTeamRole(Principal connectedUser, UUID teamRoleId) {
+    public void deleteTeamRole(UUID teamRoleId) {
 
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         TeamRole teamRole = getTeamRoleById(teamRoleId);
         boolean hasSameOrganization = userService.getUserById(teamRole.getCreatedBy()).getOrganizationId()
                 .equals(adminUser.getOrganizationId());
-        if(hasAdminRole && hasSameOrganization){
-                teamRoleRepository.deleteById(teamRoleId);
+        if (hasAdminRole && hasSameOrganization) {
+            teamRoleRepository.deleteById(teamRoleId);
         } else {
             throw new AccessDeniedException("Unauthorized access!");
         }

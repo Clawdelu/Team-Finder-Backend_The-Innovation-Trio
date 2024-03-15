@@ -5,10 +5,9 @@ import com.theinnovationtrio.TeamFinderAPI.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,9 +19,9 @@ public class InviteService implements IInviteService {
 
 
     @Override
-    public Invite createInvite(Principal connectedUser) {
+    public Invite createInvite() {
 
-        User adminUser = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
         if (hasAdminRole) {

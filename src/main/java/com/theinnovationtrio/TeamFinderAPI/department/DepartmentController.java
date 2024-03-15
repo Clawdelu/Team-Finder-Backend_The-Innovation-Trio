@@ -1,6 +1,5 @@
 package com.theinnovationtrio.TeamFinderAPI.department;
 
-import io.swagger.annotations.ApiOperation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,9 +19,9 @@ public class DepartmentController {
     private final IDepartmentService departmentService;
 
     @PostMapping()
-    public ResponseEntity<?> createDepartment(@RequestBody DepartmentDto departmentDto, Principal connectedUser) {
+    public ResponseEntity<?> createDepartment(@RequestBody DepartmentDto departmentDto) {
         try {
-            Department savedDepartment = departmentService.createDepartment(connectedUser, departmentDto);
+            Department savedDepartment = departmentService.createDepartment(departmentDto);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id}")
                     .buildAndExpand(savedDepartment.getId())
@@ -49,9 +47,9 @@ public class DepartmentController {
     }
 
     @GetMapping("/same-organization")
-    public ResponseEntity<?> getAllDepartmentsFromSameOrganization(Principal connectedUser) {
+    public ResponseEntity<?> getAllDepartmentsFromSameOrganization() {
         try {
-            List<Department> departments = departmentService.getAllSameOrgDepartments(connectedUser);
+            List<Department> departments = departmentService.getAllSameOrgDepartments();
             if (departments.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -77,10 +75,9 @@ public class DepartmentController {
     }
 
     @PutMapping("{departmentId}")
-    public ResponseEntity<?> updateDepartment(@PathVariable UUID departmentId, @RequestBody DepartmentDto departmentDto,
-                                              Principal connectedUser) {
+    public ResponseEntity<?> updateDepartment(@PathVariable UUID departmentId, @RequestBody DepartmentDto departmentDto) {
         try {
-            Department updatedDepartment = departmentService.updateDepartment(connectedUser, departmentId, departmentDto);
+            Department updatedDepartment = departmentService.updateDepartment(departmentId, departmentDto);
             return ResponseEntity.ok(updatedDepartment);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
@@ -92,9 +89,9 @@ public class DepartmentController {
     }
 
     @PatchMapping("/add-members")
-    public ResponseEntity<?> addMemberstoDepartment(@RequestBody List<UUID> userToAssignIds, Principal connectedUser) {
+    public ResponseEntity<?> addMemberstoDepartment(@RequestBody List<UUID> userToAssignIds) {
         try {
-            departmentService.addUsersToDepartment(connectedUser, userToAssignIds);
+            departmentService.addUsersToDepartment(userToAssignIds);
             return ResponseEntity.ok("User/s have been added successfully to department!");
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
@@ -104,9 +101,9 @@ public class DepartmentController {
     }
 
     @PatchMapping("/remove-members")
-    public ResponseEntity<?> removeMembersFromDepartment(@RequestBody List<UUID> userToAssignIds, Principal connectedUser) {
+    public ResponseEntity<?> removeMembersFromDepartment(@RequestBody List<UUID> userToAssignIds) {
         try {
-            departmentService.removeUsersFromDepartment(connectedUser, userToAssignIds);
+            departmentService.removeUsersFromDepartment(userToAssignIds);
             return ResponseEntity.ok("User/s have been removed successfully from department!");
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
@@ -116,9 +113,9 @@ public class DepartmentController {
     }
 
     @DeleteMapping("{departmentId}")
-    public ResponseEntity<Object> deleteDepartmentById(@PathVariable UUID departmentId, Principal connectedUser) {
+    public ResponseEntity<Object> deleteDepartmentById(@PathVariable UUID departmentId) {
         try {
-            departmentService.deleteDepartmentById(connectedUser, departmentId);
+            departmentService.deleteDepartmentById(departmentId);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
