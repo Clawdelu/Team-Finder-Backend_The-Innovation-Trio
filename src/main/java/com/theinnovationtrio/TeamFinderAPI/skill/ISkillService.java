@@ -15,6 +15,12 @@ public interface ISkillService {
 
     List<Skill> getAllSameDepartmentSkills();
 
+    List<Skill> getAllSameSkillCategorySkills(UUID skillCategoryId);
+
+    List<Skill> getAllSkillsCreatedBy();
+
+    void saveAllSkills(List<Skill> skills);
+
     void assignSkillToDepartment(UUID skillId);
 
     void removeSkillFromDepartment(UUID skillId);

@@ -22,6 +22,7 @@ public class Organization {
     private UUID createdBy;
     private String organizationName;
     private String headquarterAddress;
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     private List<User> users;
 

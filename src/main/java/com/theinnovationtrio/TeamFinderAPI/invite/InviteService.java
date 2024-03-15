@@ -1,6 +1,7 @@
 package com.theinnovationtrio.TeamFinderAPI.invite;
 
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
+import com.theinnovationtrio.TeamFinderAPI.organization.Organization;
 import com.theinnovationtrio.TeamFinderAPI.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class InviteService implements IInviteService {
         return inviteRepository.findById(inviteId)
                 .orElseThrow(() -> new EntityNotFoundException("Invite not found"));
     }
+
 
     @Override
     public List<Invite> getAllInvites() {

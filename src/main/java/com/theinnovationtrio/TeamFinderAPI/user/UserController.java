@@ -41,6 +41,11 @@ public class UserController {
         }
     }
 
+    @GetMapping("/connected-user")
+    public ResponseEntity<?> getConnectedUser() {
+        return ResponseEntity.ok(userService.getConnectedUser());
+    }
+
     @GetMapping("/same-organization")
     public ResponseEntity<?> getAllUsersFromOrganization() {
         try {

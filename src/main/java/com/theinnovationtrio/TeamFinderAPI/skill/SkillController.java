@@ -72,6 +72,36 @@ public class SkillController {
         }
     }
 
+    @GetMapping("/skill-category")
+    public ResponseEntity<?> getAllSkillsForCategory(@RequestParam UUID skillCategoryId){
+
+        try{
+            List<Skill> skills = skillService.getAllSameSkillCategorySkills(skillCategoryId);
+            if(skills.isEmpty()){
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.ok(skills);
+            }
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
+        }
+    }
+
+    @GetMapping("/same-author")
+    public ResponseEntity<?> getAllSkillsCreatedBy(){
+
+        try{
+            List<Skill> skills = skillService.getAllSkillsCreatedBy();
+            if(skills.isEmpty()){
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.ok(skills);
+            }
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> createSkill(@RequestBody SkillDto skillDto) {
         try {

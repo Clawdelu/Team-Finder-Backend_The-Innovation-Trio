@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface InviteRepository extends JpaRepository<Invite, UUID> {
     boolean existsById(@NonNull UUID id);
+
 }
