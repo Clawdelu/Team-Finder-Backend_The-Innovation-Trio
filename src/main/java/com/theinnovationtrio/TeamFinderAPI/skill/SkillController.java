@@ -57,6 +57,21 @@ public class SkillController {
         }
     }
 
+    @GetMapping("/same-department")
+    public ResponseEntity<?> getAllSkillsFromSameDepartment(){
+
+        try{
+            List<Skill> skills = skillService.getAllSameDepartmentSkills();
+            if(skills.isEmpty()){
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.ok(skills);
+            }
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> createSkill(@RequestBody SkillDto skillDto) {
         try {

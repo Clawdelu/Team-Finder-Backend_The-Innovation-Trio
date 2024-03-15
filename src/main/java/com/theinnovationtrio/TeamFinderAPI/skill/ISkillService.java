@@ -13,6 +13,8 @@ public interface ISkillService {
 
     List<Skill> getAllSameOrgSkills();
 
+    List<Skill> getAllSameDepartmentSkills();
+
     void assignSkillToDepartment(UUID skillId);
 
     void removeSkillFromDepartment(UUID skillId);
