@@ -98,7 +98,6 @@ public class SkillCategoryService implements ISkillCategoryService {
                 .equals(skillCategoryToDelete.getCreatedBy());
 
         if (createdTheSkill) {
-            // TO DO: tb sa verifici fiecare Skill si sa scoti legatura cu acest SkillCategoryID
             List<Skill> skillsToUpdate = skillService.getAllSameSkillCategorySkills(skillCategoryId)
                     .stream()
                     .peek(skill -> skill.setSkillCategory(null))

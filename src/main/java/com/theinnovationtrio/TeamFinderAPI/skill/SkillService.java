@@ -120,6 +120,18 @@ public class SkillService implements ISkillService {
     }
 
     @Override
+    public void removeDepartmentFromAllSkills(UUID departmentId) {
+        var skills = skillRepository.findAllBySameDepartment(departmentId);
+        skills.forEach(skill -> {
+            List<Department> departments = skill.getDepartments();
+            departments.removeIf(department -> department.getId()
+                    .equals(departmentId));
+            skill.setDepartments(departments);
+            skillRepository.save(skill);
+        });
+    }
+
+    @Override
     public void saveAllSkills(List<Skill> skills) {
         skillRepository.saveAll(skills);
     }

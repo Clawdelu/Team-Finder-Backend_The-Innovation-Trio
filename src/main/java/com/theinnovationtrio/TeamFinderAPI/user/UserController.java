@@ -62,13 +62,29 @@ public class UserController {
     }
 
     @GetMapping("/unassigned")
-    public ResponseEntity<?> getAllUnemployedUsers() {
+    public ResponseEntity<?> getAllUnassignedUsers() {
         try {
-            List<UserDto> unemployedUsers = userService.getAllUnemployedUsers();
+            List<UserDto> unemployedUsers = userService.getAllUnassignedUsers();
             if (unemployedUsers.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
                 return ResponseEntity.ok(unemployedUsers);
+            }
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
+        }
+    }
+
+    @GetMapping("/department-manager")
+    public ResponseEntity<?> getAllAvailableDepartManagers() {
+        try {
+            List<UserDto> allFreeDepartManagers = userService.getAllFreeDepartManagers();
+            if (allFreeDepartManagers.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.ok(allFreeDepartManagers);
             }
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());

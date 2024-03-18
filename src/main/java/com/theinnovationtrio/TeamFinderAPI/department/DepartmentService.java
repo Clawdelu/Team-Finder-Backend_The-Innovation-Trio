@@ -1,6 +1,7 @@
 package com.theinnovationtrio.TeamFinderAPI.department;
 
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
+import com.theinnovationtrio.TeamFinderAPI.skill.ISkillService;
 import com.theinnovationtrio.TeamFinderAPI.user.IUserService;
 import com.theinnovationtrio.TeamFinderAPI.user.User;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,6 +19,7 @@ public class DepartmentService implements IDepartmentService {
 
     private final DepartmentRepository departmentRepository;
     private final IUserService userService;
+    private final ISkillService skillService;
 
     @Override
     public Department createDepartment(DepartmentDto departmentDto) {
@@ -107,16 +109,17 @@ public class DepartmentService implements IDepartmentService {
             department.setDepartmentName(departmentDto.getDepartmentName());
 
             if (departmentDto.getDepartmentManager() != null) {
-                if (userService.getUserById(departmentDto.getDepartmentManager()).getDepartment() == null) {
+                if (userService.getUserById(departmentDto.getDepartmentManager()).getDepartment() != null
+                && !department.getDepartmentManager().equals(departmentDto.getDepartmentManager())) {
+                    throw new RuntimeException("The manager has already a department");
+                } else if(userService.getUserById(departmentDto.getDepartmentManager()).getDepartment() == null){
+                    userService.removeDepartmentFromUser(department.getDepartmentManager());
                     assignDepartmentManager(departmentDto, adminUser, department);
 
                     departmentRepository.save(department);
 
                     userService.addDepartmentToUser(departmentDto.getDepartmentManager(), department);
-                } else {
-                    throw new RuntimeException("The manager has already a department");
                 }
-
             } else {
                 userService.removeDepartmentFromUser(department.getDepartmentManager());
                 department.setDepartmentManager(null);
@@ -192,6 +195,7 @@ public class DepartmentService implements IDepartmentService {
             if (department.getDepartmentManager() != null) {
                 userService.removeDepartmentFromUser(department.getDepartmentManager());
             }
+            skillService.removeDepartmentFromAllSkills(departmentId);
             department.setDepartmentManager(null);
             department.setUsers(null);
             departmentRepository.deleteById(departmentId);
