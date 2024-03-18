@@ -25,7 +25,8 @@ public interface IUserService {
     List<UserDto> getOrganizationUsers();
     UserDto getConnectedUser();
 
-    List<UserDto> getAllUnemployedUsers();
+    List<UserDto> getAllUnassignedUsers();
+    List<UserDto> getAllFreeDepartManagers();
 
     void addRoleToUser(UUID userId, List<Role> roles);
 

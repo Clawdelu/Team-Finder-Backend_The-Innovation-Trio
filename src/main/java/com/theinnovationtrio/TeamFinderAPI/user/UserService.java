@@ -96,16 +96,29 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<UserDto> getAllUnemployedUsers() {
+    public List<UserDto> getAllUnassignedUsers() {
+        User departManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean hasDepartManagerRole = departManagerUser.getRoles().stream()
+                .anyMatch(role -> role.equals(Role.Department_Manager));
+        if (hasDepartManagerRole) {
+            var unassignedUsers = userRepository.findAllUnassignedEmp(departManagerUser.getOrganizationId());
+            return userMapper.INSTANCE.mapToUserDto(unassignedUsers);
+        } else {
+            throw new AccessDeniedException("Unauthorized access!");
+        }
+    }
+
+    @Override
+    public List<UserDto> getAllFreeDepartManagers() {
         User adminUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean hasAdminRole = adminUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Organization_Admin));
-        if (hasAdminRole) {
-            List<UserDto> unemployedUsers = getAllUsers();
-            return unemployedUsers.stream()
-                    .filter(user -> user.getDepartment() == null
-                            && user.getOrganizationId().equals(adminUser.getOrganizationId()))
+        if(hasAdminRole){
+            var allUnassignedEmp = userRepository.findAllUnassignedEmp(adminUser.getOrganizationId());
+            var filteredEmp =  allUnassignedEmp.stream()
+                    .filter(user -> user.getRoles().contains(Role.Department_Manager))
                     .collect(Collectors.toList());
+            return userMapper.INSTANCE.mapToUserDto(filteredEmp);
         } else {
             throw new AccessDeniedException("Unauthorized access!");
         }
