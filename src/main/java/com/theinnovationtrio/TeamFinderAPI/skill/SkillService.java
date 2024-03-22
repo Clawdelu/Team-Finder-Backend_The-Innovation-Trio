@@ -2,15 +2,16 @@ package com.theinnovationtrio.TeamFinderAPI.skill;
 
 import com.theinnovationtrio.TeamFinderAPI.department.Department;
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
-import com.theinnovationtrio.TeamFinderAPI.user.IUserService;
+import com.theinnovationtrio.TeamFinderAPI.skillCategory.ISkillCategoryService;
+import com.theinnovationtrio.TeamFinderAPI.skillCategory.SkillCategory;
 import com.theinnovationtrio.TeamFinderAPI.user.User;
+import com.theinnovationtrio.TeamFinderAPI.user_skill.IUserSkillService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +20,7 @@ import java.util.UUID;
 public class SkillService implements ISkillService {
 
     private final SkillRepository skillRepository;
-    private final IUserService userService;
+    private final ISkillCategoryService skillCategoryService;
 
     @Override
     public Skill createSkill(SkillDto skillDto) {
@@ -32,13 +33,15 @@ public class SkillService implements ISkillService {
             Skill skill = Skill
                     .builder()
                     .id(UUID.randomUUID())
-                    .skillCategory(skillDto.getSkillCategory())
+                    .skillCategory(skillCategoryService.getSkillCategoryById(skillDto.getSkillCategoryId()))
                     .skillName(skillDto.getSkillName())
                     .description(skillDto.getDescription())
                     .createdBy(departmentManagerUser.getId())
                     .build();
             if (skillDto.isAddedToDepartment()) {
-                skill.setDepartments(Arrays.asList(departmentManagerUser.getDepartment()));
+                var departments = skill.getDepartments();
+                departments.add(departmentManagerUser.getDepartment());
+                skill.setDepartments(departments);
             }
             return skillRepository.save(skill);
 
@@ -51,7 +54,7 @@ public class SkillService implements ISkillService {
     public Skill getSkillById(UUID skillId) {
 
         return skillRepository.findById(skillId)
-                .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Skill not found"));
     }
 
     @Override
@@ -82,7 +85,7 @@ public class SkillService implements ISkillService {
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
 
-        if(hasDepartmentManagerRole){
+        if (hasDepartmentManagerRole) {
             return skillRepository.findAllBySameDepartment(departmentManagerUser.getDepartment().getId());
         } else {
             throw new AccessDeniedException("Unauthorized access!");
@@ -96,7 +99,7 @@ public class SkillService implements ISkillService {
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
 
-        if(hasDepartmentManagerRole){
+        if (hasDepartmentManagerRole) {
             return skillRepository.findAllBySameCategory(skillCategoryId);
 
         } else {
@@ -111,11 +114,33 @@ public class SkillService implements ISkillService {
         boolean hasDepartmentManagerRole = departmentManagerUser.getRoles().stream()
                 .anyMatch(role -> role.equals(Role.Department_Manager));
 
-        if(hasDepartmentManagerRole){
+        if (hasDepartmentManagerRole) {
             return skillRepository.findAllBySameAuthor(departmentManagerUser.getId());
 
         } else {
             throw new AccessDeniedException("Unauthorized access!");
+        }
+    }
+
+    @Override
+    public void deleteSkillCategoryById(UUID skillCategoryId) {
+        User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        SkillCategory skillCategoryToDelete = skillCategoryService.getSkillCategoryById(skillCategoryId);
+
+        boolean createdTheSkill = departmentManagerUser.getId()
+                .equals(skillCategoryToDelete.getCreatedBy());
+
+        if (createdTheSkill) {
+            List<Skill> skillsToUpdate = getAllSameSkillCategorySkills(skillCategoryId)
+                    .stream()
+                    .peek(skill -> skill.setSkillCategory(null))
+                    .toList();
+            saveAllSkills(skillsToUpdate);
+            skillCategoryService.deleteSkillCategoryById(skillCategoryId);
+
+        } else {
+            throw new AccessDeniedException("Unauthorized access! You aren't the author.");
         }
     }
 
@@ -185,7 +210,7 @@ public class SkillService implements ISkillService {
                 .equals(skillToUpdate.getCreatedBy());
 
         if (createdTheSkill) {
-            skillToUpdate.setSkillCategory(skillDto.getSkillCategory());
+            skillToUpdate.setSkillCategory(skillCategoryService.getSkillCategoryById(skillDto.getSkillCategoryId()));
             skillToUpdate.setSkillName(skillDto.getSkillName());
             skillToUpdate.setDescription(skillDto.getDescription());
             if (skillDto.isAddedToDepartment()) {
@@ -204,18 +229,6 @@ public class SkillService implements ISkillService {
 
     @Override
     public void deleteSkillById(UUID skillId) {
-
-        User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Skill skillToDelete = getSkillById(skillId);
-        boolean createdTheSkill = departmentManagerUser.getId()
-                .equals(skillToDelete.getCreatedBy());
-
-        if (createdTheSkill) {
-            // TO DO: tb sa stergi legatura cu User_Skill, adica sa faci skill = null
-            skillRepository.deleteById(skillId);
-
-        } else {
-            throw new AccessDeniedException("Unauthorized access! You aren't the author.");
-        }
+        skillRepository.deleteById(skillId);
     }
 }

@@ -1,5 +1,6 @@
 package com.theinnovationtrio.TeamFinderAPI.skill;
 
+import com.theinnovationtrio.TeamFinderAPI.user.IUserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,9 +19,11 @@ import java.util.UUID;
 public class SkillController {
 
     private final ISkillService skillService;
+    private final IUserService userService;
 
     @GetMapping()
     public ResponseEntity<List<Skill>> getAllSkills() {
+
         List<Skill> skills = skillService.getAllSkills();
         if (skills.isEmpty()) {
             return ResponseEntity.noContent()
@@ -33,8 +36,8 @@ public class SkillController {
 
     @GetMapping("{skillId}")
     public ResponseEntity<?> getSkillById(@PathVariable UUID skillId) {
-
         try {
+
             Skill skill = skillService.getSkillById(skillId);
             return ResponseEntity.ok(skill);
         } catch (EntityNotFoundException ex) {
@@ -44,8 +47,8 @@ public class SkillController {
 
     @GetMapping("/same-organization")
     public ResponseEntity<?> getAllSkillsFromSameOrganization() {
-
         try {
+
             List<Skill> skills = skillService.getAllSameOrgSkills();
             if (skills.isEmpty()) {
                 return ResponseEntity.noContent().build();
@@ -59,8 +62,8 @@ public class SkillController {
 
     @GetMapping("/same-department")
     public ResponseEntity<?> getAllSkillsFromSameDepartment(){
-
         try{
+
             List<Skill> skills = skillService.getAllSameDepartmentSkills();
             if(skills.isEmpty()){
                 return ResponseEntity.noContent().build();
@@ -74,8 +77,8 @@ public class SkillController {
 
     @GetMapping("/skill-category")
     public ResponseEntity<?> getAllSkillsForCategory(@RequestParam UUID skillCategoryId){
-
         try{
+
             List<Skill> skills = skillService.getAllSameSkillCategorySkills(skillCategoryId);
             if(skills.isEmpty()){
                 return ResponseEntity.noContent().build();
@@ -89,8 +92,8 @@ public class SkillController {
 
     @GetMapping("/same-author")
     public ResponseEntity<?> getAllSkillsCreatedBy(){
-
         try{
+
             List<Skill> skills = skillService.getAllSkillsCreatedBy();
             if(skills.isEmpty()){
                 return ResponseEntity.noContent().build();
@@ -102,9 +105,11 @@ public class SkillController {
         }
     }
 
+
     @PostMapping
     public ResponseEntity<?> createSkill(@RequestBody SkillDto skillDto) {
         try {
+
             Skill skill = skillService.createSkill(skillDto);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id}")
@@ -121,8 +126,8 @@ public class SkillController {
 
     @PutMapping("{skillId}")
     public ResponseEntity<?> updateSkill(@PathVariable UUID skillId, @RequestBody SkillDto skillDto) {
-
         try {
+
             Skill skill = skillService.updateSkill(skillId, skillDto);
             return ResponseEntity.ok(skill);
 
@@ -136,8 +141,8 @@ public class SkillController {
 
     @PatchMapping("{skillId}/add-skill-to-department")
     public ResponseEntity<?> addSkillToDepartment(@PathVariable UUID skillId) {
-
         try {
+
             skillService.assignSkillToDepartment(skillId);
             return ResponseEntity.ok("Skill have been added successfully to department!");
         } catch (EntityNotFoundException ex) {
@@ -149,8 +154,8 @@ public class SkillController {
 
     @PatchMapping("{skillId}/remove-skill-from-department")
     public ResponseEntity<?> removeSkillFromDepartment(@PathVariable UUID skillId) {
-
         try {
+
             skillService.removeSkillFromDepartment(skillId);
             return ResponseEntity.ok("Skill have been removed successfully from department!");
         } catch (EntityNotFoundException ex) {
@@ -162,9 +167,8 @@ public class SkillController {
 
     @DeleteMapping("{skillId}")
     public ResponseEntity<?> deleteSkill(@PathVariable UUID skillId) {
-
         try {
-            skillService.deleteSkillById(skillId);
+            userService.deleteSkillById(skillId);
             return ResponseEntity.ok().build();
 
         } catch (EntityNotFoundException ex) {

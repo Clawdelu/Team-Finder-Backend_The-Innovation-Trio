@@ -1,5 +1,6 @@
 package com.theinnovationtrio.TeamFinderAPI.skillCategory;
 
+import com.theinnovationtrio.TeamFinderAPI.skill.ISkillService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class SkillCategoryController {
 
     private final ISkillCategoryService skillCategoryService;
+    private final ISkillService skillService;
 
     @GetMapping()
     public ResponseEntity<List<SkillCategory>> getAllSkillCategories() {
@@ -98,7 +100,7 @@ public class SkillCategoryController {
     public ResponseEntity<?> deleteSkillCategoryById(@PathVariable UUID skillCategoryId) {
 
         try {
-            skillCategoryService.deleteSkillCategoryById(skillCategoryId);
+            skillService.deleteSkillCategoryById(skillCategoryId);
             return ResponseEntity.ok().build();
 
         } catch (EntityNotFoundException ex) {

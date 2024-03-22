@@ -43,6 +43,7 @@ public class InviteController {
     @PostMapping()
     public ResponseEntity<?> createInvite() {
         try {
+
             Invite savedInvite = inviteService
                     .createInvite();
 

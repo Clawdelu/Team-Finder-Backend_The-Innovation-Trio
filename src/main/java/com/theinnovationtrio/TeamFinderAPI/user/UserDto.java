@@ -1,14 +1,7 @@
 package com.theinnovationtrio.TeamFinderAPI.user;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.theinnovationtrio.TeamFinderAPI.department.Department;
-import com.theinnovationtrio.TeamFinderAPI.entities.User_Skill;
+import com.theinnovationtrio.TeamFinderAPI.user_skill.User_Skill;
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
-import com.theinnovationtrio.TeamFinderAPI.organization.Organization;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.*;
 
 import java.util.List;

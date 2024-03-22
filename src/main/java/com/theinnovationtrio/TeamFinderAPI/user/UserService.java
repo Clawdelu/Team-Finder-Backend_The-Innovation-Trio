@@ -7,6 +7,11 @@ import com.theinnovationtrio.TeamFinderAPI.enums.Role;
 import com.theinnovationtrio.TeamFinderAPI.organization.IOrganizationService;
 import com.theinnovationtrio.TeamFinderAPI.organization.Organization;
 import com.theinnovationtrio.TeamFinderAPI.organization.OrganizationDto;
+import com.theinnovationtrio.TeamFinderAPI.skill.ISkillService;
+import com.theinnovationtrio.TeamFinderAPI.skill.Skill;
+import com.theinnovationtrio.TeamFinderAPI.user_skill.IUserSkillService;
+import com.theinnovationtrio.TeamFinderAPI.user_skill.UserSkillDto;
+import com.theinnovationtrio.TeamFinderAPI.user_skill.User_Skill;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,6 +33,8 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final IOrganizationService organizationService;
+    private final IUserSkillService userSkillService;
+    private final ISkillService skillService;
 
     @Override
     public User createUser(UserRegisterRequest userRegisterRequest, UUID organizationId) {
@@ -91,7 +98,7 @@ public class UserService implements IUserService {
     @Override
     public UserDto getConnectedUser() {
         User contextUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user =getUserById(contextUser.getId());
+        User user = getUserById(contextUser.getId());
         return userMapper.INSTANCE.mapToUserDto(user);
     }
 
@@ -150,6 +157,42 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public void removeUserSkillById(UUID userSkillId) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User userToUpdate = getUserById(user.getId());
+        List<User_Skill> userSkills = userToUpdate.getSkills();
+        userSkills.removeIf(userSkill -> userSkill.getId()
+                .equals(userSkillId));
+        userToUpdate.setSkills(userSkills);
+        userRepository.save(userToUpdate);
+        userSkillService.deleteUserSkillById(userSkillId);
+    }
+
+
+
+    @Override
+    public void assignUserSkill(UUID skillId, UserSkillDto userSkillDto) {
+
+        var createdUserSkill = userSkillService.createUserSkill(userSkillDto,skillId);
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User userToUpdate = getUserById(user.getId());
+
+        List<User_Skill> userSkills = userToUpdate.getSkills();
+        userSkills.add(createdUserSkill);
+        userToUpdate.setSkills(userSkills);
+        userRepository.save(userToUpdate);
+
+    }
+
+    @Override
+    public List<User_Skill> getAllUserSkills() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return getUserById(user.getId()).getSkills();
+    }
+
+
+    @Override
     public User removeDepartmentFromUser(UUID userToRemoveId) {
         User userToRemoveDepartment = getUserById(userToRemoveId);
         userToRemoveDepartment.setDepartment(null);
@@ -161,6 +204,11 @@ public class UserService implements IUserService {
         User userToAssignDepartment = getUserById(userToAssignId);
         userToAssignDepartment.setDepartment(department);
         return userRepository.save(userToAssignDepartment);
+    }
+
+    @Override
+    public User_Skill updateUserSkill(UUID userSkillId, UserSkillDto userSkillDto) {
+        return userSkillService.updateUserSkill(userSkillId,userSkillDto);
     }
 
 
@@ -176,6 +224,29 @@ public class UserService implements IUserService {
             userRepository.deleteById(userId);
         } else {
             throw new AccessDeniedException("Unauthorized access!");
+        }
+    }
+
+
+    @Override
+    public void deleteSkillById(UUID skillId) {
+        User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Skill skillToDelete = skillService.getSkillById(skillId);
+        boolean createdTheSkill = departmentManagerUser.getId()
+                .equals(skillToDelete.getCreatedBy());
+
+        if (createdTheSkill) {
+            List<User_Skill> user_skillsToDelete = userSkillService.getAllUserSkillsBySkill(skillToDelete);
+            user_skillsToDelete.forEach(userSkill -> {
+                var users = userRepository.findAllBySkills(userSkill);
+                for (User user : users) {
+                    user.getSkills().removeIf(userSkill1 -> userSkill1.getId().equals(userSkill.getId()));
+                }
+                userSkillService.deleteUserSkillById(userSkill.getId());
+            });
+            skillService.deleteSkillById(skillId);
+        } else {
+            throw new AccessDeniedException("Unauthorized access! You aren't the author.");
         }
     }
 }

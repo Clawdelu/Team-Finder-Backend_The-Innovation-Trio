@@ -1,5 +1,8 @@
 package com.theinnovationtrio.TeamFinderAPI.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum Experience {
     SIX_MONTHS("0-6 months"),
     ONE_YEAR("6-12 months"),
@@ -13,7 +16,4 @@ public enum Experience {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
-    }
 }

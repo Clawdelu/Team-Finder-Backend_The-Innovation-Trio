@@ -1,5 +1,8 @@
 package com.theinnovationtrio.TeamFinderAPI.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum Level {
     LEARNS("1 - Learns"),
     KNOWS("2 - Knows"),
@@ -13,7 +16,4 @@ public enum Level {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
-    }
 }

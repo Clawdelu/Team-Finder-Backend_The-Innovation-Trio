@@ -1,6 +1,7 @@
 package com.theinnovationtrio.TeamFinderAPI.department;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class DepartmentController {
     private final IDepartmentService departmentService;
 
     @PostMapping()
-    public ResponseEntity<?> createDepartment(@RequestBody DepartmentDto departmentDto) {
+    public ResponseEntity<?> createDepartment(@Valid  @RequestBody DepartmentDto departmentDto) {
         try {
             Department savedDepartment = departmentService.createDepartment(departmentDto);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()

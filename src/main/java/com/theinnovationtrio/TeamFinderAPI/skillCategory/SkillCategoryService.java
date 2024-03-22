@@ -1,8 +1,6 @@
 package com.theinnovationtrio.TeamFinderAPI.skillCategory;
 
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
-import com.theinnovationtrio.TeamFinderAPI.skill.ISkillService;
-import com.theinnovationtrio.TeamFinderAPI.skill.Skill;
 import com.theinnovationtrio.TeamFinderAPI.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +16,7 @@ import java.util.UUID;
 public class SkillCategoryService implements ISkillCategoryService {
 
     private final SkillCategoryRepository skillCategoryRepository;
-    private final ISkillService skillService;
+
 
     @Override
     public SkillCategory createSkillCategory(SkillCategoryDto skillCategoryDto) {
@@ -89,25 +87,6 @@ public class SkillCategoryService implements ISkillCategoryService {
 
     @Override
     public void deleteSkillCategoryById(UUID skillCategoryId) {
-
-        User departmentManagerUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        SkillCategory skillCategoryToDelete = getSkillCategoryById(skillCategoryId);
-
-        boolean createdTheSkill = departmentManagerUser.getId()
-                .equals(skillCategoryToDelete.getCreatedBy());
-
-        if (createdTheSkill) {
-            List<Skill> skillsToUpdate = skillService.getAllSameSkillCategorySkills(skillCategoryId)
-                    .stream()
-                    .peek(skill -> skill.setSkillCategory(null))
-                    .toList();
-            skillService.saveAllSkills(skillsToUpdate);
-
-            skillCategoryRepository.deleteById(skillCategoryId);
-
-        } else {
-            throw new AccessDeniedException("Unauthorized access! You aren't the author.");
-        }
+        skillCategoryRepository.deleteById(skillCategoryId);
     }
 }

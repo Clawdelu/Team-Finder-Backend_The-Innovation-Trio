@@ -19,6 +19,8 @@ public interface ISkillService {
 
     List<Skill> getAllSkillsCreatedBy();
 
+    void deleteSkillCategoryById(UUID skillCategoryId);
+
     void removeDepartmentFromAllSkills(UUID departmentId);
 
     void saveAllSkills(List<Skill> skills);

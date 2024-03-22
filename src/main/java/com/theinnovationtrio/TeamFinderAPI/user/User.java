@@ -2,7 +2,7 @@ package com.theinnovationtrio.TeamFinderAPI.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.theinnovationtrio.TeamFinderAPI.department.Department;
-import com.theinnovationtrio.TeamFinderAPI.entities.User_Skill;
+import com.theinnovationtrio.TeamFinderAPI.user_skill.User_Skill;
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;

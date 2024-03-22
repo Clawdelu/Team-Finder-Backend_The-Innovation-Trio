@@ -1,6 +1,7 @@
 package com.theinnovationtrio.TeamFinderAPI.user;
 
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
+import com.theinnovationtrio.TeamFinderAPI.user_skill.User_Skill;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,5 +18,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             "where u.organizationId = :organizationId " +
             "and u.department is null")
     List<User> findAllUnassignedEmp(@Param("organizationId") UUID organizationId);
+
+    List<User> findAllBySkills(User_Skill userSkill);
 
 }

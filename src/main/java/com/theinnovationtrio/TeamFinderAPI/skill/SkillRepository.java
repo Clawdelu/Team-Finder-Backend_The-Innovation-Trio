@@ -26,6 +26,9 @@ public interface SkillRepository extends JpaRepository<Skill, UUID> {
             "where s.createdBy = :authorId")
     List<Skill> findAllBySameAuthor(UUID authorId);
 
+    @Query("delete from User_Skill us " +
+            "where us.skill.id = :skillId")
+    void deleteSkillFromUser_SkillBySkillId(UUID skillId);
 
 
 }

@@ -1,6 +1,8 @@
 package com.theinnovationtrio.TeamFinderAPI.user;
 
 import com.theinnovationtrio.TeamFinderAPI.enums.Role;
+import com.theinnovationtrio.TeamFinderAPI.user_skill.IUserSkillService;
+import com.theinnovationtrio.TeamFinderAPI.user_skill.UserSkillDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.ErrorMessage;
@@ -17,6 +19,7 @@ import java.util.UUID;
 @RequestMapping("/users")
 public class UserController {
     private final IUserService userService;
+    private final IUserSkillService userSkillService;
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
@@ -31,6 +34,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable UUID userId) {
         try {
+
             User user = userService.getUserById(userId);
             return ResponseEntity.ok(user);
         } catch (EntityNotFoundException ex) {
@@ -49,6 +53,7 @@ public class UserController {
     @GetMapping("/same-organization")
     public ResponseEntity<?> getAllUsersFromOrganization() {
         try {
+
             List<UserDto> organizationUsers = userService.getOrganizationUsers();
             if (organizationUsers.isEmpty()) {
                 return ResponseEntity.noContent().build();
@@ -64,6 +69,7 @@ public class UserController {
     @GetMapping("/unassigned")
     public ResponseEntity<?> getAllUnassignedUsers() {
         try {
+
             List<UserDto> unemployedUsers = userService.getAllUnassignedUsers();
             if (unemployedUsers.isEmpty()) {
                 return ResponseEntity.noContent().build();
@@ -80,6 +86,7 @@ public class UserController {
     @GetMapping("/department-manager")
     public ResponseEntity<?> getAllAvailableDepartManagers() {
         try {
+
             List<UserDto> allFreeDepartManagers = userService.getAllFreeDepartManagers();
             if (allFreeDepartManagers.isEmpty()) {
                 return ResponseEntity.noContent().build();
@@ -93,9 +100,46 @@ public class UserController {
         }
     }
 
-    @PatchMapping("{userId}/assign-roles/")
+    @GetMapping("/skills")
+    public ResponseEntity<?> getAllSkillsFromUser() {
+
+        var skills = userService.getAllUserSkills();
+        if (skills.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(skills);
+        }
+    }
+
+    // TREBUIE STERS; DOAR PETNTRU TEST
+    @GetMapping("/SKILLS-BY-ID/{userSkillId}")
+    public ResponseEntity<?> getSkillById(@PathVariable UUID userSkillId) {
+
+        try{
+           return ResponseEntity.ok(userSkillService.getUserSkillById(userSkillId));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Message: " + ex.getMessage());
+        }
+    }
+
+    // TREBUIE STERS; DOAR PETNTRU TEST
+    @GetMapping("/SKILLS-ALL")
+    public ResponseEntity<?> getSkillById() {
+
+        var skills = userSkillService.getAllUsersSkills();
+        if (skills.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(skills);
+        }
+    }
+
+    @PatchMapping("{userId}/assign-roles")
     public ResponseEntity<?> addRoleToUser(@PathVariable UUID userId, @RequestBody List<Role> roles) {
         try {
+
             userService.addRoleToUser(userId, roles);
             return ResponseEntity.ok("Roles have been added successfully!");
         } catch (EntityNotFoundException ex) {
@@ -105,10 +149,50 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/assign-skill-to-user/{skillId}")
+    public ResponseEntity<?> assignSkillToUser(@PathVariable UUID skillId, @RequestBody UserSkillDto userSkillDto) {
+        try {
+
+            userService.assignUserSkill(skillId, userSkillDto);
+            return ResponseEntity.ok("Skill has been added successfully to user!");
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body("Message: " + ex.getMessage());
+        }
+    }
+
+    @PutMapping("update-skill/{userSkillId}")
+    public ResponseEntity<?> updateUserSkill(@PathVariable UUID userSkillId, @RequestBody UserSkillDto userSkillDto){
+
+        try{
+
+            var userSkill = userService.updateUserSkill(userSkillId,userSkillDto);
+            return ResponseEntity.ok(userSkill);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body("Message: " + ex.getMessage());
+        }
+    }
+
+    @DeleteMapping("/remove-skill-from-user/{skillId}")
+    public ResponseEntity<?> removeSkillFromUser(@PathVariable UUID skillId) {
+        try {
+
+            userService.removeUserSkillById(skillId);
+            return ResponseEntity.ok("Skill has been removed successfully!");
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message: " + ex.getMessage());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body("Message: " + ex.getMessage());
+        }
+    }
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable UUID userId) {
         try {
+
             userService.deleteUserById(userId);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException ex) {
